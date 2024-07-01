@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { HousingLocationComponent } from './housing-location/housing-location.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,9 @@ import { HousingLocationComponent } from './housing-location/housing-location.co
   imports: [
     RouterOutlet,
     HomeComponent,
-    HousingLocationComponent
+    HousingLocationComponent,
+    HomeComponent,
+    RouterModule
   ],
   //templateUrl: './app.component.html',
   template: `
@@ -18,7 +21,7 @@ import { HousingLocationComponent } from './housing-location/housing-location.co
       <img class="brand-logo" src="/picture1.jpg" alt="logo" height="200px" aria-hidden="true">
     </header>
     <section class="content">
-      <app-home></app-home>
+      <router-outlet></router-outlet>
     </section>
   </main>
 `,
