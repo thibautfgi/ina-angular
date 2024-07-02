@@ -6,7 +6,7 @@ bootstrapApplication(AppComponent,
   {
     providers: [
       provideProtractorTestingSupport(),
-      provideRouter(routeConfig)
+      provideRouter(routeConfig) // liste de route 
     ]
   }
 ).catch(err => console.error(err));
