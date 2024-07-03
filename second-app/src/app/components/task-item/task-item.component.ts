@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Task } from '../../Task';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -16,7 +16,13 @@ import { NgStyle } from '@angular/common';
 export class TaskItemComponent {
 
 
+
   @Input() task!: Task;
+  @Output() onDeleteTask: EventEmitter<Task> = new EventEmitter()
   faTimes = faTimes; // permet d'ajouter des icons dans notre html
+
+  toggleDel(task: Task | undefined) {
+    this.onDeleteTask.emit(task);
+  }
 
 }
