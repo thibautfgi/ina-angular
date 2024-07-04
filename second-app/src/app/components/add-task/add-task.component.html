@@ -1,4 +1,4 @@
-<form class="add-form" (ngSubmit)="onSubmit()">
+<form *ngIf="showAddTask" class="add-form" (ngSubmit)="onSubmit()">
      <!-- ng submit ====  ngSubmit lie l'événement submit du formulaire à 
       la méthode onSubmit qd click la methode ce lance-->
     <div class="form-control">
