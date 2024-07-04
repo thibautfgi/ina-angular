@@ -21,7 +21,9 @@ export class TasksComponent implements OnInit {
   constructor(private taskService: TaskService) {}
 
   ngOnInit(): void {
-      this.taskService.getTasks().subscribe((tasks) => (this.tasks = tasks)); // ??????? idntknow
+      this.taskService.getTasks().subscribe((tasks) => (this.tasks = tasks)); 
+      // subscribe : Déclenche l'exécution de l'observable et permet de 
+      //définir des callbacks pour traiter la réponse (succès, erreur, etc.).
   }
 
 
@@ -36,8 +38,10 @@ export class TasksComponent implements OnInit {
       () => (this.tasks = this.tasks.filter(t => t.id !== task.id)));
   }
 
-  toggleReminder(task: Task) {
-    task.reminder= !task.reminder; // si true deviens false / si false deviens true
-    console.log(task.reminder)
+  toggleReminder(task: Task): void {
+    task.reminder = !task.reminder;
+    this.taskService.updateReminder(task).subscribe();
   }
+
+  
 }

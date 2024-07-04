@@ -1,6 +1,6 @@
 // services/task.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Task } from '../Task';
 import { Observable } from 'rxjs';
 
@@ -22,4 +22,14 @@ export class TaskService {
     const url = `${this.apiUrl}/${task.id}`;
     return this.http.delete<Task>(url);
   }
+
+
+  updateReminder(task: Task): Observable<Task> {
+    const url = `${this.apiUrl}/${task.id}`;
+    return this.http.patch<Task>(url, { reminder: task.reminder }, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    });
+}
+
+
 }
