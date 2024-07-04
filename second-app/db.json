@@ -19,15 +19,15 @@
       "reminder": true
     },
     {
-      "id": "0db7",
-      "text": "zeQFS",
-      "day": "SF",
-      "reminder": true
-    },
-    {
       "id": "e6dd",
       "text": "salut",
       "day": "6 fevrier",
+      "reminder": true
+    },
+    {
+      "id": "e659",
+      "text": "test last",
+      "day": "6fev",
       "reminder": true
     }
   ]
