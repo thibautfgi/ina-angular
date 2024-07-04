@@ -1,3 +1,13 @@
-go into ina-angular n type "ng serve"
+angular lurning 
 
-this repo is a lurning repo.
+> go inside a repo for testing
+
+```
+ng serve
+```
+
+> you will need to use the local json api
+
+```
+json-server --watch db.json
+```
