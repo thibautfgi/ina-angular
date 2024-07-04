@@ -4,13 +4,14 @@ import { Task } from '../../Task';
 import { NgFor } from '@angular/common';
 import { TaskItemComponent } from "../task-item/task-item.component";
 import { TaskService } from '../../services/task.service';
+import { AddTaskComponent } from '../add-task/add-task.component';
 
 @Component({
     selector: 'app-tasks',
     standalone: true,
     templateUrl: './tasks.component.html',
     styleUrl: './tasks.component.css',
-    imports: [NgFor, TaskItemComponent]
+    imports: [NgFor, TaskItemComponent, AddTaskComponent]
 })
 export class TasksComponent implements OnInit {
 
@@ -36,6 +37,12 @@ export class TasksComponent implements OnInit {
     this.taskService
     .deleteTask(task).subscribe(
       () => (this.tasks = this.tasks.filter(t => t.id !== task.id)));
+  }
+
+  addTask(task: Task) {
+    this.taskService
+    .addNewTask(task).subscribe((task) => (this.tasks.push(task)));
+
   }
 
   toggleReminder(task: Task): void {
