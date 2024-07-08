@@ -1,8 +1,11 @@
 .textnode {
     font-size: 14px;
     color: black;
-    font-style: italic;
     margin: 0;
     padding: 0;
     line-height: 1; /* Ajustez cette valeur selon vos besoins */
+}
+
+.node {
+    font-size: 8px;
 }

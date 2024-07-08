@@ -1,19 +1,19 @@
-<form>
+<form (ngSubmit)="onSubmit()">
    <div class="form-control">
        <label for="text">Entrez votre identifiant</label>
-       <input type="text" name="username" id="username"  />
+       <input type="text" name="username" [(ngModel)]="username" id="username"  />
    </div>
    <div class="form-control">
     <label for="day">Entrez votre ancien mot de passe</label> 
-    <input type="text" name="oldPassword"  id="oldPassword" />
+    <input type="text" name="oldPassword"  [(ngModel)]="oldPassword" id="oldPassword" />
     </div>
    <div class="form-control">
        <label for="day">Entrez votre nouveau mot de passe</label> 
-       <input type="text" name="newPassword"  id="newPassword" />
+       <input type="text" name="newPassword"  [(ngModel)]="newPassword" (ngModelChange)="updateValidationStates()" id="newPassword" />
    </div>
    <div class="form-control">
        <label for="reminder">Confirmez votre mot de passe</label>
-       <input type="text" name="confirmPassword"  id="confirmPassword"/>
+       <input type="text" name="confirmPassword"  [(ngModel)]="confirmPassword" id="confirmPassword"/>
    </div>
    <input type="submit" value="Valider" class="confirmButton">
 </form>
