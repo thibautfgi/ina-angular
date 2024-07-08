@@ -23,4 +23,17 @@ export class ValidationService { // etats de validation initial de notre formula
     this.validationState = { ...this.validationState, ...newState }; // ?? sa marche mais ??
     this.validationStateSubject.next(this.validationState); // prend la donne actualise et la donne au abonne
   }
+
+  resetValidationState() {
+    this.validationState = {
+      isMinLengthValid: false,
+      isLowerCaseValid: false,
+      isUpperCaseValid: false,
+      isDigitValid: false,
+      isSpecialCharValid: false
+    };
+    this.validationStateSubject.next(this.validationState);
+  }
+
+  
 }

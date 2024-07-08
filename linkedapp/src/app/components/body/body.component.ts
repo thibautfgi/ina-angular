@@ -1,16 +1,21 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ValidationService } from '../../services/password.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faLock } from '@fortawesome/free-solid-svg-icons'
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-body',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FontAwesomeModule],
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
 export class BodyComponent {
 
+  faLock = faLock;
+  faUser = faUser;
   username!: string;
   oldPassword!: string;
   newPassword!: string;
@@ -20,13 +25,16 @@ export class BodyComponent {
 
   onSubmit() {
     if (!this.username || !this.oldPassword || !this.newPassword || !this.confirmPassword) {
-      alert("champs vide!"); // envoie une alerte si vide // TODO: autre systeme que une alerte
+      alert("champs vide!"); // TODO: autre systeme que une alerte
       return;
     } else {
       this.username = "";
       this.oldPassword = "";
       this.newPassword = "";
       this.confirmPassword = "";
+      
+      // Réinitialiser les états de validation
+      this.validationService.resetValidationState();
     }
   }
 

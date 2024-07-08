@@ -8,4 +8,5 @@
 
 .node {
     font-size: 8px;
+    margin-right: 10px; /* Espace entre l'icône et le texte */
 }

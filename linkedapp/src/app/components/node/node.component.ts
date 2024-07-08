@@ -17,6 +17,6 @@ export class NodeComponent {
   FaCircle = faCircle;
 
   get color() {
-    return this.isTrue ? 'green' : 'red'; // Si la condition est remplie, vert, sinon rouge
+    return this.isTrue ? 'rgba(0,171,202)' : 'red'; // Si la condition est remplie, vert, sinon rouge
   }
 }

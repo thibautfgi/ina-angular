@@ -11,3 +11,12 @@
 .imgLogo {
     width: 100PX;
 }
+
+
+.nodes-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alignement à gauche */
+    gap: 0.5rem; /* Espacement entre les nodes */
+  }
+  

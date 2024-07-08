@@ -1,0 +1,93 @@
+.formBody {
+    background-color: white; /* Fond blanc */
+    border-radius: 8px;
+    
+    padding: 20px;
+    margin: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour effet de profondeur */
+}
+
+.formControl {
+    margin-bottom: 15px; /* Espacement entre les contrôles */
+    display: flex;
+    
+    flex-direction: column;
+}
+
+.formControl label {
+    font-size: 14px; 
+    color: black;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border-left: none;
+    width: 100%;
+}
+
+.input-group-prepend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color:rgba(0,171,202); 
+    padding: 9.5px;
+    border: none;
+}
+
+.input-group-prepend .icon {
+    font-size: 16px;
+    color: white
+}
+
+.formControl input.form-control {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.confirmButton {
+    background-color:rgba(225,0,141); /* Couleur rose pour le bouton */
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.confirmButton:hover {
+    background-color: #c70877; /* Couleur légèrement plus foncée au survol */
+}
+
+.text-center {
+    text-align: center;
+}
+
+.title {
+    color: rgba(0, 171, 202);
+    font-weight: bold;
+    font-size: 30px;
+    margin-top: 20px;
+}
+
+.text1 {
+    font-size: 14px;
+}
+
+.imgLogo {
+    width: 100px;
+}
+
+.nodes-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+    gap: 0.5rem; /* Espacement entre les nodes */
+    margin-left: -10px;
+}
