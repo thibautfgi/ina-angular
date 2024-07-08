@@ -1,15 +1,19 @@
 <form>
    <div class="form-control">
-       <label for="text">Task</label>
-       <input type="text" name="text" id="text" placeholder="Add Task" />
+       <label for="text">Entrez votre identifiant</label>
+       <input type="text" name="username" id="username"  />
    </div>
    <div class="form-control">
-       <label for="day">Day & Time</label> 
-       <input type="text" name="day"  id="day" placeholder="Add deadline" />
+    <label for="day">Entrez votre ancien mot de passe</label> 
+    <input type="text" name="oldPassword"  id="oldPassword" />
+    </div>
+   <div class="form-control">
+       <label for="day">Entrez votre nouveau mot de passe</label> 
+       <input type="text" name="newPassword"  id="newPassword" />
    </div>
    <div class="form-control">
-       <label for="reminder">Set Reminder </label>
-       <input type="checkbox" name="reminder"  id="reminder" />
+       <label for="reminder">Confirmez votre mot de passe</label>
+       <input type="text" name="confirmPassword"  id="confirmPassword"/>
    </div>
-   <input type="submit" value="Save Task" class="btn btn btn-block">
+   <input type="submit" value="Valider" class="confirmButton">
 </form>
