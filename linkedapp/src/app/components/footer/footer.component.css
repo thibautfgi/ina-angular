@@ -1,0 +1,14 @@
+.footerLink {
+   color: rgba(76,171,204);
+}
+
+.question {
+    color: rgba(0,171,202);
+    border: 1px;
+}
+
+.icon-container {
+    display: inline-block;
+    padding: 4px;
+    border: 2px solid rgba(0,171,202); /* Couleur et épaisseur de la bordure */
+}
