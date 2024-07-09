@@ -103,7 +103,7 @@ export class BodyComponent implements OnInit {
       isLowerCaseValid: /[a-z]/.test(password),
       isUpperCaseValid: /[A-Z]/.test(password),
       isDigitValid: /[0-9]/.test(password),
-      isSpecialCharValid: /[@$%*=\/\-+?!]/.test(password)
+      isSpecialCharValid: /[@$%*=\/\-+?!&"'()-_°:;,.§µ£|#]/.test(password)
     });
   }
 }
