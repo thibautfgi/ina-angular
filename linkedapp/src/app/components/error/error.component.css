@@ -3,3 +3,9 @@
     font-size: 15px;
     font-weight: bold;
 }
+
+.succesMessage {
+    color: rgba(0,171,202);
+    font-size: 15px;
+    font-weight: bold;
+}

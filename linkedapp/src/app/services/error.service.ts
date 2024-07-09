@@ -10,7 +10,8 @@ export class ErrorService {
     showErrorLogin: false,
     showErrorSamePassword: false,
     showErrorSecurityPassword: false,
-    showErrorMatchPassword: false
+    showErrorMatchPassword: false,
+    showSucces: false
   };
 
 
@@ -30,7 +31,8 @@ export class ErrorService {
       showErrorLogin: false,
       showErrorSamePassword: false,
       showErrorSecurityPassword: false,
-      showErrorMatchPassword: false
+      showErrorMatchPassword: false,
+      showSucces: false
     };
     this.errorStateSubject.next(this.errorState);
   }

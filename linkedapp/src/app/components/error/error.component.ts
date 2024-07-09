@@ -18,6 +18,7 @@
     showErrorSamePassword: boolean = false;
     showErrorSecurityPassword: boolean = false;
     showErrorMatchPassword: boolean = false;
+    showSucces: boolean = false;
    
 
     constructor(private errorService: ErrorService) {}
@@ -29,6 +30,7 @@
         this.showErrorSamePassword = state.showErrorSamePassword;
         this.showErrorSecurityPassword = state.showErrorSecurityPassword;
         this.showErrorMatchPassword = state.showErrorMatchPassword;
+        this.showSucces = state.showSucces;
       });
     }
 

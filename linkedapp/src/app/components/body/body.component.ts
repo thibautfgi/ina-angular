@@ -83,6 +83,7 @@ export class BodyComponent implements OnInit {
       return;
     }
 
+    this.errorService.updateErrorState({ showSucces: true });
 
     // SUCCES Ici, envoyez les données au serveur
 
