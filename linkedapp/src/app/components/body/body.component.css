@@ -100,3 +100,7 @@
     margin-left: -10px;
 }
 
+.errorPlace {
+    min-width: 100px; /* Ensure it has some width even if empty */
+    min-height: 40px; /* Ensure it has some height even if empty */
+}

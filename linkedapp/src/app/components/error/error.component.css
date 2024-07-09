@@ -1,6 +1,5 @@
-.errorTest {
+.errorMessage {
     color: red;
-    font-size: 16px;
-    font-style: italic;
+    font-size: 15px;
     font-weight: bold;
 }

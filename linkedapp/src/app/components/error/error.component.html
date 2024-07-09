@@ -1,5 +1,15 @@
+<div *ngIf="showErrorChampsEmpty" class="errorMessage">
+    <p>Champs vides.</p>
+</div>
 
+<div *ngIf="showErrorLogin" class="errorMessage">
+    <p>Identifiant et/ou mots de passe incorrecte.</p>
+</div>
 
-<div class="errorTest">
-    <p>Mots de passe Incorecte!</p>
+<div *ngIf="showErrorSecurityPassword" class="errorMessage">
+    <p>Votre mots de passe doit respecter les règles de sécurité.</p>     
+</div>
+
+<div *ngIf="showErrorMatchPassword" class="errorMessage">
+    <p>Vos nouveaux mots de passe ne correspondent pas.</p>
 </div>
