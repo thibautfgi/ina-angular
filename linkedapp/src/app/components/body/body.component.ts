@@ -4,11 +4,12 @@ import { ValidationService } from '../../services/password.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faLock } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { ErrorComponent } from '../error/error.component';
 
 @Component({
   selector: 'app-body',
   standalone: true,
-  imports: [FormsModule, FontAwesomeModule],
+  imports: [FormsModule, FontAwesomeModule, ErrorComponent],
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })

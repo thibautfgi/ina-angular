@@ -1,16 +1,13 @@
 .formBody {
     background-color: white; /* Fond blanc */
-    border-radius: 8px;
-    
-    padding: 20px;
-    margin: 15px;
+    padding: 25px;
+    margin: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour effet de profondeur */
 }
 
 .formControl {
     margin-bottom: 15px; /* Espacement entre les contrôles */
-    display: flex;
-    
+    display: flex;   
     flex-direction: column;
 }
 
@@ -19,14 +16,14 @@
     color: black;
 }
 
-.input-group {
+.inputGroup {
     display: flex;
     align-items: center;
-    border-left: none;
+    border: 10px;
     width: 100%;
 }
 
-.input-group-prepend {
+.inputIcon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,9 +32,9 @@
     border: none;
 }
 
-.input-group-prepend .icon {
+.inputIcon .icon {
     font-size: 16px;
-    color: white
+    color: white;
 }
 
 .formControl input.form-control {
@@ -45,6 +42,18 @@
     padding: 10px;
     font-size: 14px;
     width: 100%;
+    border-width: 1px;
+    border-color: rgba(127,127,127);
+    border-radius: 0px;
+    border-left: none;
+    outline: black
+}
+
+.formControl input:focus, .formControl textarea:focus, .formControl select:focus {
+    outline: none; /* Supprime le contour par défaut */
+    box-shadow: none; /* Supprime l'ombre par défaut */
+    border-color: black; /* Maintient la couleur de la bordure */
+    background-color: rgb(236, 234, 234);
 }
 
 .confirmButton {
@@ -53,7 +62,6 @@
     font-size: 16px;
     font-weight: bold;
     border: none;
-    border-radius: 4px;
     padding: 10px 20px;
     cursor: pointer;
     width: 100%;
@@ -91,3 +99,4 @@
     gap: 0.5rem; /* Espacement entre les nodes */
     margin-left: -10px;
 }
+
