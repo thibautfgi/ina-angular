@@ -62,7 +62,13 @@ export class BodyComponent implements OnInit {
     //   return;
     // }
 
-    
+
+      // test erreur same password
+      if (this.newPassword === this.oldPassword ) {
+        this.errorService.updateErrorState({ showErrorSamePassword: true });
+        return;
+      }
+
 
     // test erreur securite mdp
     if (!this.isMinLengthValid || !this.isLowerCaseValid || !this.isUpperCaseValid || !this.isDigitValid || !this.isSpecialCharValid) {

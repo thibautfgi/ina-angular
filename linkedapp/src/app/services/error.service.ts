@@ -8,6 +8,7 @@ export class ErrorService {
   private errorState = {
     showErrorChampsEmpty: false,
     showErrorLogin: false,
+    showErrorSamePassword: false,
     showErrorSecurityPassword: false,
     showErrorMatchPassword: false
   };
@@ -27,6 +28,7 @@ export class ErrorService {
     this.errorState = {
       showErrorChampsEmpty: false,
       showErrorLogin: false,
+      showErrorSamePassword: false,
       showErrorSecurityPassword: false,
       showErrorMatchPassword: false
     };

@@ -15,8 +15,10 @@
   export class ErrorComponent implements OnInit {
     showErrorChampsEmpty: boolean = false;
     showErrorLogin: boolean = false;
+    showErrorSamePassword: boolean = false;
     showErrorSecurityPassword: boolean = false;
     showErrorMatchPassword: boolean = false;
+   
 
     constructor(private errorService: ErrorService) {}
 
@@ -24,6 +26,7 @@
         this.errorService.errorState$.subscribe(state => {
         this.showErrorChampsEmpty = state.showErrorChampsEmpty;
         this.showErrorLogin = state.showErrorLogin;
+        this.showErrorSamePassword = state.showErrorSamePassword;
         this.showErrorSecurityPassword = state.showErrorSecurityPassword;
         this.showErrorMatchPassword = state.showErrorMatchPassword;
       });
