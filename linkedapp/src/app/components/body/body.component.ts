@@ -46,11 +46,14 @@ export class BodyComponent implements OnInit {
     });
   }
 
+
+  // quand le button valide est appuye, lance onSubmit()
   onSubmit() {
+
     // Réinitialiser les erreurs avant de vérifier les champs
     this.errorService.resetErrorState();
 
-    // test erreur champs vide
+    // test si champs vide
     if (!this.username || !this.oldPassword || !this.newPassword || !this.confirmPassword) {
       this.errorService.updateErrorState({ showErrorChampsEmpty: true });
       return;
@@ -59,25 +62,25 @@ export class BodyComponent implements OnInit {
     // Mettre à jour les états de validation
     this.updateValidationStates();
 
-    // Verify credentials and change password
+    // test si bon login + mdp combo
     this.authService.verifyAuth(this.username, this.oldPassword)
       .subscribe(
         response => {
           console.log('Credentials are valid');
           
-          // Check if new password matches old password
+          // test si new et old password identique
           if (this.newPassword === this.oldPassword) {
             this.errorService.updateErrorState({ showErrorSamePassword: true });
             return;
           }
 
-          // Check password security
+          // test la securite du password
           if (!this.isMinLengthValid || !this.isLowerCaseValid || !this.isUpperCaseValid || !this.isDigitValid || !this.isSpecialCharValid) {
             this.errorService.updateErrorState({ showErrorSecurityPassword: true });
             return;
           }
 
-          // Check erreur newpassword et confirmpassword pareil
+          // test si newpassword et confirmnewpassword identique
           if (this.newPassword !== this.confirmPassword) {
             this.errorService.updateErrorState({ showErrorMatchPassword: true });
             return;
@@ -104,7 +107,7 @@ export class BodyComponent implements OnInit {
               }
             );
         },
-        error => { //erreur LOGIN msg
+        error => { // renvoie que le login et mdp ne match pas
           console.error('Invalid credentials', error);
           this.errorService.updateErrorState({ showErrorLogin: true });
         }

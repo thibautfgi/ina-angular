@@ -6,7 +6,10 @@ const app = express();
 const port = 3000;
 
 // Use CORS middleware
-app.use(cors());
+// permet de reglementer la provenance des calls api
+app.use(cors({
+    origin: 'http://localhost:4200'
+  }));
 
 // Create an LDAP client
 const ldapClient = ldap.createClient({
@@ -15,7 +18,7 @@ const ldapClient = ldap.createClient({
 
 app.use(express.json());
 
-// Route to verify the user's credentials
+// Route Auth, permet de teste login + mdp d'un user
 app.post('/verify-auth', (req, res) => {
   const { username, password } = req.body;
 
@@ -28,15 +31,16 @@ app.post('/verify-auth', (req, res) => {
   });
 });
 
-// Route to change the user's password
+
+
+// Route changepasseword, permet de changer le mdp d'un user
 app.post('/change-password', (req, res) => {
   const { username, oldPassword, newPassword } = req.body;
 
-
-    // Create a change object to update the password
+    // Create a change object to update the password, neccesaire et tres norme
     const change = new ldap.Change({
       operation: 'replace',
-      modification: new ldap.Attribute({
+      modification: new ldap.Attribute({ 
         type: 'userPassword',
         values: [newPassword]
       })
@@ -53,6 +57,8 @@ app.post('/change-password', (req, res) => {
   });
 
 
+
+// run le express / ldapjs server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
