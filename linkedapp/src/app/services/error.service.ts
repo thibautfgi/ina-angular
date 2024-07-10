@@ -25,6 +25,7 @@ export class ErrorService {
   }
 
 
+  // remet a zero le champs erreur, le fait disparaitre
   resetErrorState() {
     this.errorState = {
       showErrorChampsEmpty: false,
