@@ -5,6 +5,7 @@ import { ErrorService } from '../../services/error.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { ErrorComponent } from '../error/error.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-body',
@@ -55,7 +56,7 @@ export class BodyComponent implements OnInit {
     this.updateValidationStates();
 
 
-        // Logic pour vérifier login et password
+        // Logic pour vérifier login et password son dans la bdd
     // TODO: Ajouter la logique pour vérifier login et password
     // if (loginCheckFails) {
     //   this.errorService.updateErrorState({ showErrorLogin: true });
