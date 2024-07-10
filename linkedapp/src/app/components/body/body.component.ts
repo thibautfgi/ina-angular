@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ValidationService } from '../../services/password.service';
 import { ErrorService } from '../../services/error.service';
+import { AuthService } from '../../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { ErrorComponent } from '../error/error.component';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-body',
@@ -15,7 +15,6 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./body.component.css']
 })
 export class BodyComponent implements OnInit {
-
   faLock = faLock;
   faUser = faUser;
 
@@ -30,9 +29,13 @@ export class BodyComponent implements OnInit {
   isDigitValid: boolean = false;
   isSpecialCharValid: boolean = false;
 
-  constructor(private validationService: ValidationService, private errorService: ErrorService) {}
+  constructor(
+    private validationService: ValidationService,
+    private errorService: ErrorService,
+    private authService: AuthService
+  ) {}
 
-  ngOnInit() { // s'abonne au changement du service
+  ngOnInit() {
     this.validationService.validationStateObservable.subscribe(state => {
       this.isMinLengthValid = state.isMinLengthValid;
       this.isLowerCaseValid = state.isLowerCaseValid;
@@ -43,62 +46,52 @@ export class BodyComponent implements OnInit {
   }
 
   onSubmit() {
-    // Réinitialiser les erreurs avant de vérifier les champs
     this.errorService.resetErrorState();
 
-    // test erreur champs vide
     if (!this.username || !this.oldPassword || !this.newPassword || !this.confirmPassword) {
       this.errorService.updateErrorState({ showErrorChampsEmpty: true });
       return;
     }
 
-    // Mettre à jour les états de validation
     this.updateValidationStates();
 
+    this.authService.verifyAuth(this.username, this.oldPassword).subscribe(
+      response => {
+        console.log('Credentials are valid');
 
-        // Logic pour vérifier login et password son dans la bdd
-    // TODO: Ajouter la logique pour vérifier login et password
-    // if (loginCheckFails) {
-    //   this.errorService.updateErrorState({ showErrorLogin: true });
-    //   return;
-    // }
+        if (this.newPassword === this.oldPassword) {
+          this.errorService.updateErrorState({ showErrorSamePassword: true });
+          return;
+        }
 
+        if (!this.isMinLengthValid || !this.isLowerCaseValid || !this.isUpperCaseValid || !this.isDigitValid || !this.isSpecialCharValid) {
+          this.errorService.updateErrorState({ showErrorSecurityPassword: true });
+          return;
+        }
 
-      // test erreur same password
-      if (this.newPassword === this.oldPassword ) {
-        this.errorService.updateErrorState({ showErrorSamePassword: true });
-        return;
+        if (this.newPassword !== this.confirmPassword) {
+          this.errorService.updateErrorState({ showErrorMatchPassword: true });
+          return;
+        }
+
+        this.errorService.updateErrorState({ showSucces: true });
+
+        this.username = "";
+        this.oldPassword = "";
+        this.newPassword = "";
+        this.confirmPassword = "";
+
+        this.validationService.resetValidationState();
+      },
+      error => {
+        console.error('Invalid credentials', error);
+        this.errorService.updateErrorState({ showErrorLogin: true });
       }
-
-
-    // test erreur securite mdp
-    if (!this.isMinLengthValid || !this.isLowerCaseValid || !this.isUpperCaseValid || !this.isDigitValid || !this.isSpecialCharValid) {
-      this.errorService.updateErrorState({ showErrorSecurityPassword: true });
-      return;
-    }
-
-
-    // test erreur password matching
-    if (this.newPassword !== this.confirmPassword) {
-      this.errorService.updateErrorState({ showErrorMatchPassword: true });
-      return;
-    }
-
-    this.errorService.updateErrorState({ showSucces: true });
-
-    // SUCCES Ici, envoyez les données au serveur
-
-    this.username = "";
-    this.oldPassword = "";
-    this.newPassword = "";
-    this.confirmPassword = "";
-
-    // Réinitialiser les états de validation
-    this.validationService.resetValidationState();
+    );
   }
 
   updateValidationStates() {
-    const password = this.newPassword || ''; // Utiliser le mot de passe actuel
+    const password = this.newPassword || '';
     this.validationService.updateValidationState({
       isMinLengthValid: password.length >= 8,
       isLowerCaseValid: /[a-z]/.test(password),
