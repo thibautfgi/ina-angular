@@ -6,6 +6,8 @@ COPY . /usr/src/app
 
 RUN npm install -g @angular/cli@10.8.1
 
+RUN npm install ldapjs
+
 RUN npm install bootstrap
 
 RUN npm install @fortawesome/angular-fontawesome @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons
