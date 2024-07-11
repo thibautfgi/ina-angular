@@ -7,12 +7,11 @@ const port = 3000;
 
 // Use CORS middleware
 app.use(cors({
-    origin: 'http://localhost:4200' // laisse passer uniquement le port 4200 localhost
   }));
 
 // Create an LDAP client
 const ldapClient = ldap.createClient({
-  url: 'ldap://localhost:389' // notre port du ldap (setup dans docker-compose openldap)
+  url: 'ldap://' + process.env.SERVERLDAP // notre port du ldap (setup dans docker-compose openldap)
 });
 
 app.use(express.json()); 

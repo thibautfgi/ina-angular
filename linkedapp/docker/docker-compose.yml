@@ -1,0 +1,49 @@
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.38.0/24
+
+services:
+  ldap:
+    image: osixia/openldap:latest
+    container_name: openldap
+    environment:
+      LDAP_ORGANISATION: "My Company"
+      LDAP_DOMAIN: "mycompany.com"
+      LDAP_ADMIN_PASSWORD: "admin"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ./ldap/data:/var/lib/ldap
+      - ./ldap/config:/etc/ldap/slapd.d
+    networks:
+      - my_network
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - "6443:443"
+    networks:
+      - my_network
+    
+  server.js:
+    image: node:22.4.1
+    container_name: server.js
+    entrypoint: ['sh', '/app/start.sh'] 
+    working_dir: /app
+    volumes:
+      - ../server:/app:rw
+    environment:
+      SERVERLDAP: ldap:389
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+
