@@ -14,6 +14,9 @@ RUN npm install cors
 
 RUN npm install bootstrap
 
+RUN npm install --save-dev jasmine-core karma karma-chrome-launcher karma-jasmine karma-jasmine-html-reporter
+
+
 RUN npm install @fortawesome/angular-fontawesome @fortawesome/fontawesome-svg-core @fortawesome/free-solid-svg-icons
 
 CMD ["ng", "serve", "--host", "0.0.0.0"]

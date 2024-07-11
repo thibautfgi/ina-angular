@@ -6,8 +6,8 @@ const app = express();
 const port = 3000;
 
 // Use CORS middleware
-app.use(cors({
-  }));
+// peux me permette d'acepter des calls api que de certaine adresse cible
+app.use(cors());
 
 // Create an LDAP client
 const ldapClient = ldap.createClient({
@@ -20,43 +20,61 @@ app.use(express.json());
 app.post('/verify-auth', (req, res) => {
   const { username, password } = req.body;
 
+  console.log('Received auth request:', { username, password }); // c'est pas très secure non???
+
   // ldapClient.bind = essaye de ce connecter avec les login + mdp et renvoie une reponse
   ldapClient.bind(`cn=${username},ou=users,dc=mycompany,dc=com`, password, (err) => {
     if (err) {
+
+      console.error('Login ou mdp invalide for user:', username);
+
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    console.log('Utilisateur approuvé ! Nom :', username);
+
     res.json({ message: 'Credentials are valid' });
   });
 });
-
-
 
 // L'endpoint changepasseword, permet de changer le mdp d'un user 
 app.post('/change-password', (req, res) => {
   const { username, newPassword } = req.body;
 
-    // Cree un "change object ldap.change et ldap.attribute", neccesaire et tres norme
-    const change = new ldap.Change({  
-      operation: 'replace',
-      modification: new ldap.Attribute({ 
-        type: 'userPassword',
-        values: [newPassword]
-      })
-    });
+  console.log('Received password change request for user:', username);
 
-    // ldapClient.modify === fais un changement dans le ldap, modify le password de l'user
-    ldapClient.modify(`cn=${username},ou=users,dc=mycompany,dc=com`, change, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Password change failed' });
-      }
-
-      res.json({ message: 'Password changed successfully' });
-    });
+  // Cree un "change object ldap.change et ldap.attribute", neccesaire et tres norme
+  const change = new ldap.Change({  
+    operation: 'replace',
+    modification: new ldap.Attribute({ 
+      type: 'userPassword',
+      values: [newPassword]
+    })
   });
 
+  console.log('LDAP change object created:', change);
 
+  // ldapClient.modify === fais un changement dans le ldap, modify le password de l'user
+
+  // ADAPTER LA LOGIC DE CONNECTION DE LDAP ICI en fct de l'arborescence de l'entreprise 
+  ldapClient.modify(`cn=${username},ou=users,dc=mycompany,dc=com`, change, (err) => {
+    if (err) {
+
+      console.error('Password change failed for user:', username);
+      
+      return res.status(500).json({ message: 'Password change failed' });
+    }
+
+    console.log('Password changed successfully for user:', username);
+
+    res.json({ message: 'Password changed successfully' });
+  });
+});
 
 // run le express/ldapjs server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server_express_ldap.js est en marche sur le port : http://localhost:${port}`);
 });
+
+// permet d'envoye des tests sans demarer directement le server
+module.exports = app;
