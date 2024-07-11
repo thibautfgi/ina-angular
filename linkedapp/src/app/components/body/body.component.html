@@ -1,50 +1,51 @@
 
 
 <div class="container-fluid"> <!-- START Container 1 -->
+
     <div class="row justify-content-center"> <!-- START Row 1 -->
 
 
         <div class="col-xl-4 col-lg-3 col-md2 col-sm-1 col-0"></div>
 
 
-        <div class="col-xl-4 col-lg-6 col-md-8 col-sm-10 col-12">
+        <div class="col-xl-4 col-lg-6 col-md-8 col-sm-10 col-12"> <!-- boostrap responsive screen classe -->
 
-            <form (ngSubmit)="onSubmit()" class="formBody">
+            <form (ngSubmit)="onSubmit()" class="formBodyContaineur">
 
-                <div class="formControl">
+                <div class="formContaineur"> <!-- form identifiant -->
                     <label for="username">Entrez votre identifiant</label>
-                    <div class="inputGroup">
-                        <div class="inputIcon">
+                    <div class="inputGroupContaineur">
+                        <div class="inputIconContaineur">
                             <fa-icon [icon]="faUser" class="icon"></fa-icon>
                         </div>
                         <input type="text" name="username" [(ngModel)]="username" id="username" class="form-control" />
                     </div>
                 </div>
 
-                <div class="formControl">
+                <div class="formContaineur"> <!-- form ancien mdp -->
                     <label for="oldPassword">Entrez votre ancien mot de passe</label>
-                    <div class="inputGroup">
-                        <div class="inputIcon">
+                    <div class="inputGroupContaineur">
+                        <div class="inputIconContaineur">
                             <fa-icon [icon]="faLock" class="icon"></fa-icon>
                         </div>
                         <input type="password" name="oldPassword" [(ngModel)]="oldPassword" id="oldPassword" class="form-control" />
                     </div>
                 </div>
 
-                <div class="formControl">
+                <div class="formContaineur"> <!-- form nouveau mdp -->
                     <label for="newPassword">Entrez votre nouveau mot de passe</label>
-                    <div class="inputGroup">
-                        <div class="inputIcon">
+                    <div class="inputGroupContaineur">
+                        <div class="inputIconContaineur">
                             <fa-icon [icon]="faLock" class="icon"></fa-icon>
                         </div>
-                        <input type="password" name="newPassword" [(ngModel)]="newPassword" (ngModelChange)="updateValidationStates()" id="newPassword" class="form-control" />
+                        <input type="password" name="newPassword" [(ngModel)]="newPassword" (ngModelChange)="updateNodes()" id="newPassword" class="form-control" />
                     </div>
                 </div>
 
-                <div class="formControl">
+                <div class="formContaineur"> <!-- form confirm mdp -->
                     <label for="confirmPassword">Confirmez votre mot de passe</label>
-                    <div class="inputGroup">
-                        <div class="inputIcon">
+                    <div class="inputGroupContaineur">
+                        <div class="inputIconContaineur">
                             <fa-icon [icon]="faLock" class="icon"></fa-icon>
                         </div>
                         <input type="password" name="confirmPassword" [(ngModel)]="confirmPassword" id="confirmPassword" class="form-control" />
@@ -60,7 +61,7 @@
 
     </div> <!-- END Row 1 -->
 
-    <div class="row">
+    <div class="row"> <!-- START Row 2 -->
 
         <div class="col-md-2 ">
         </div>
@@ -74,7 +75,7 @@
         <div class="col-md-2 ">
         </div>
         
-    </div>
+    </div><!-- END Row 2 -->
 
 
 </div> <!-- END Container 1 -->

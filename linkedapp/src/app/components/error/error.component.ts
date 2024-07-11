@@ -12,7 +12,7 @@
   })
 
 
-  export class ErrorComponent implements OnInit {
+  export class ErrorComponent implements OnInit { //  place les booleans a zero et affiche donc aucun msg d'erreur
     showErrorChampsEmpty: boolean = false;
     showErrorLogin: boolean = false;
     showErrorSamePassword: boolean = false;
@@ -21,10 +21,10 @@
     showSucces: boolean = false;
    
 
-    constructor(private errorService: ErrorService) {}
+    constructor(private errorService: ErrorService) {} //utilise les fct d'error service
 
     ngOnInit() {
-        this.errorService.errorState$.subscribe(state => {
+        this.errorService.errorState$.subscribe(state => { // suscribe aun service error et observe les changements des booleans pour les rendre dans le components
         this.showErrorChampsEmpty = state.showErrorChampsEmpty;
         this.showErrorLogin = state.showErrorLogin;
         this.showErrorSamePassword = state.showErrorSamePassword;

@@ -1,28 +1,27 @@
-const express = require('express');
-const ldap = require('ldapjs');
-const cors = require('cors');
+const express = require('express'); // node.js frawmework pour web et mobile application
+const ldap = require('ldapjs'); // js framework pour ldap client & server pour web et mobile app, permet l'interaction avec http service
+const cors = require('cors'); // permet de reglementer la provenance des calls api
 
 const app = express();
 const port = 3000;
 
 // Use CORS middleware
-// permet de reglementer la provenance des calls api
 app.use(cors({
-    origin: 'http://localhost:4200'
+    origin: 'http://localhost:4200' // laisse passer uniquement le port 4200 localhost
   }));
 
 // Create an LDAP client
 const ldapClient = ldap.createClient({
-  url: 'ldap://localhost:389'
+  url: 'ldap://localhost:389' // notre port du ldap (setup dans docker-compose openldap)
 });
 
-app.use(express.json());
+app.use(express.json()); 
 
-// Route Auth, permet de teste login + mdp d'un user
+// l'endpoint Auth, permet de teste login + mdp d'un user
 app.post('/verify-auth', (req, res) => {
   const { username, password } = req.body;
 
-  // Bind to the LDAP server using the user's credentials
+  // ldapClient.bind = essaye de ce connecter avec les login + mdp et renvoie une reponse
   ldapClient.bind(`cn=${username},ou=users,dc=mycompany,dc=com`, password, (err) => {
     if (err) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -33,12 +32,12 @@ app.post('/verify-auth', (req, res) => {
 
 
 
-// Route changepasseword, permet de changer le mdp d'un user
+// L'endpoint changepasseword, permet de changer le mdp d'un user 
 app.post('/change-password', (req, res) => {
-  const { username, oldPassword, newPassword } = req.body;
+  const { username, newPassword } = req.body;
 
-    // Create a change object to update the password, neccesaire et tres norme
-    const change = new ldap.Change({
+    // Cree un "change object ldap.change et ldap.attribute", neccesaire et tres norme
+    const change = new ldap.Change({  
       operation: 'replace',
       modification: new ldap.Attribute({ 
         type: 'userPassword',
@@ -46,7 +45,7 @@ app.post('/change-password', (req, res) => {
       })
     });
 
-    // Modify the user's password
+    // ldapClient.modify === fais un changement dans le ldap, modify le password de l'user
     ldapClient.modify(`cn=${username},ou=users,dc=mycompany,dc=com`, change, (err) => {
       if (err) {
         return res.status(500).json({ message: 'Password change failed' });
@@ -58,7 +57,7 @@ app.post('/change-password', (req, res) => {
 
 
 
-// run le express / ldapjs server
+// run le express/ldapjs server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

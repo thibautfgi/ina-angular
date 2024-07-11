@@ -1,3 +1,4 @@
+/* le font du txt des nodes */
 .textnode {
     font-size: 14px;
     color: black;
@@ -6,6 +7,7 @@
     line-height: 1; /* Ajustez cette valeur selon vos besoins */
 }
 
+/* le logo des nodes */
 .node {
     font-size: 8px;
     margin-right: 10px; /* Espace entre l'icône et le texte */

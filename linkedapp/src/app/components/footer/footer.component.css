@@ -1,15 +1,12 @@
-.footerLink {
+/*  couleur du txt link footer  */
+.footerLink { 
    color: rgba(76,171,204);
 }
 
-.question {
-    color: rgba(0,171,202);
-    border: 1px;
-}
-
-.iconContainer {
+ /*   le cadre bleu du msg du footer */
+.iconContainer { 
     display: inline-block;
     padding: 4px;
-    border: 2px solid rgba(0,171,202); /* Couleur et épaisseur de la bordure */
+    border: 2px solid rgba(0,171,202); 
     font-size: 16px;
 }

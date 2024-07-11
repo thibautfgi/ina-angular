@@ -5,6 +5,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { BodyComponent } from './components/body/body.component';
 import { NodeComponent } from './components/node/node.component';
 
+// component principal de l'app
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { NodeComponent } from './components/node/node.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
+
 export class AppComponent {
-  title = 'linkedapp';
   
 }

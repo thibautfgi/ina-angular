@@ -11,12 +11,12 @@ import { NgStyle } from '@angular/common';
   styleUrls: ['./node.component.css']
 })
 export class NodeComponent {
-  @Input() text!: string;
-  @Input() isTrue!: boolean;
+  @Input() text!: string; // le txt lier a la node
+  @Input() isTrue!: boolean; // le booleans qui change la couleur de la node
 
-  FaCircle = faCircle;
+  FaCircle = faCircle; // fontawesome logo cercle = la node
 
-  get color() {
-    return this.isTrue ? 'rgba(0,171,202)' : 'red'; // Si la condition est remplie, vert, sinon rouge
+  get color() { // Si la condition est remplie, vert, sinon rouge
+    return this.isTrue ? 'rgba(0,171,202)' : 'red'; 
   }
 }

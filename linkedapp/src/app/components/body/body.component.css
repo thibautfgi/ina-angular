@@ -1,29 +1,35 @@
-.formBody {
+/* le containeur du form en général */
+.formBodyContaineur { 
     background-color: white; /* Fond blanc */
     padding: 25px;
     margin: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour effet de profondeur */
 }
 
-.formControl {
+/* titre form containeur */
+.formContaineur {
     margin-bottom: 15px; /* Espacement entre les contrôles */
     display: flex;   
     flex-direction: column;
 }
 
-.formControl label {
+
+/* font titre form */
+.formContaineur label {
     font-size: 14px; 
     color: black;
 }
 
-.inputGroup {
+/* containeur de l'icon + form */
+.inputGroupContaineur {
     display: flex;
     align-items: center;
     border: 10px;
     width: 100%;
 }
 
-.inputIcon {
+/* containeur rectangle de l'icon */
+.inputIconContaineur {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,12 +38,15 @@
     border: none;
 }
 
-.inputIcon .icon {
+
+/* logo cadena et utilisateur du form */
+.inputIconContaineur .icon {
     font-size: 16px;
     color: white;
 }
 
-.formControl input.form-control {
+/* form containeur dquand select le containeur */
+.formContaineur input.form-control {
     flex: 1;
     padding: 10px;
     font-size: 14px;
@@ -49,13 +58,16 @@
     outline: black
 }
 
-.formControl input:focus, .formControl textarea:focus, .formControl select:focus {
+/* si le form est selectionner */
+.formContaineur input:focus, .formContaineur textarea:focus, .formContaineur select:focus {
     outline: none; /* Supprime le contour par défaut */
     box-shadow: none; /* Supprime l'ombre par défaut */
     border-color: black; /* Maintient la couleur de la bordure */
     background-color: rgb(236, 234, 234);
 }
 
+
+/* le button valider */
 .confirmButton {
     background-color:rgba(225,0,141); /* Couleur rose pour le bouton */
     color: white;
@@ -69,29 +81,16 @@
     transition: background-color 0.3s ease;
 }
 
+
+/*  le button valider en survoler */
 .confirmButton:hover {
     background-color: #c70877; /* Couleur légèrement plus foncée au survol */
 }
 
-.text-center {
-    text-align: center;
-}
 
-.title {
-    color: rgba(0, 171, 202);
-    font-weight: bold;
-    font-size: 30px;
-    margin-top: 20px;
-}
 
-.text1 {
-    font-size: 14px;
-}
 
-.imgLogo {
-    width: 100px;
-}
-
+/* le containeur pour les nodes de la secu du mdp */
 .nodes-container {
     display: flex;
     flex-direction: column;
@@ -100,7 +99,8 @@
     margin-left: -10px;
 }
 
-.errorPlace {
+/* laisse une place disponible vide pour l'erreur */
+.errorPlace { 
     min-width: 100px; /* Ensure it has some width even if empty */
     min-height: 40px; /* Ensure it has some height even if empty */
 }

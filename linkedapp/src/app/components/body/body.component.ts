@@ -14,10 +14,12 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
+
+
 export class BodyComponent implements OnInit {
 
-  faLock = faLock;
-  faUser = faUser;
+  faLock = faLock; //logo cadena fontawesome
+  faUser = faUser; // logo user fontawesome
 
   username!: string;
   oldPassword!: string;
@@ -30,13 +32,13 @@ export class BodyComponent implements OnInit {
   isDigitValid: boolean = false;
   isSpecialCharValid: boolean = false;
 
-  constructor(
+  constructor(   // permet d'utiliser les service via dependency injection - DI
     private validationService: ValidationService,
     private errorService: ErrorService,
     private authService: AuthService
   ) {}
 
-  ngOnInit() { // s'abonne au changement du service
+  ngOnInit() { // s'abonne au changement du service ce lance au demarrage
     this.validationService.validationStateObservable.subscribe(state => {
       this.isMinLengthValid = state.isMinLengthValid;
       this.isLowerCaseValid = state.isLowerCaseValid;
@@ -60,7 +62,7 @@ export class BodyComponent implements OnInit {
     }
 
     // Mettre à jour les états de validation
-    this.updateValidationStates();
+    this.updateNodes();
 
     // test si bon login + mdp combo
     this.authService.verifyAuth(this.username, this.oldPassword)
@@ -87,18 +89,18 @@ export class BodyComponent implements OnInit {
           }
 
           // Change le password et SUCCES reponse
-          this.authService.changePassword(this.username, this.oldPassword, this.newPassword)
+          this.authService.changePassword(this.username, this.newPassword)
             .subscribe(
               response => {
                 this.errorService.updateErrorState({ showSucces: true });
                 
-                // Reset form fields
+                // Reset les form 
                 this.username = "";
                 this.oldPassword = "";
                 this.newPassword = "";
                 this.confirmPassword = "";
 
-                // Reset validation states
+                // Reset les nodes de validation
                 this.validationService.resetValidationState();
               },
               error => {
@@ -114,7 +116,7 @@ export class BodyComponent implements OnInit {
       );
   }
 
-  updateValidationStates() {
+  updateNodes() { // Mettre à jour les états de validation des nodes, test les conditions et envoie des booleans
     const password = this.newPassword || ''; // Utiliser le mot de passe actuel
     this.validationService.updateValidationState({
       isMinLengthValid: password.length >= 8,

@@ -1,9 +1,11 @@
+/* font du msg d'erreur */
 .errorMessage {
     color: red;
     font-size: 15px;
     font-weight: bold;
 }
 
+/* font du msg succes */
 .succesMessage {
     color: rgba(0,171,202);
     font-size: 15px;

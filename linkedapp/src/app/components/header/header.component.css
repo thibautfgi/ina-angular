@@ -1,19 +1,22 @@
+/* font du titre */
 .title {
     color:rgba(0,171,202);
     font-weight: bold;
     font-size: 28px;
 }
 
+/* font du txt */
 .text1 {
     font-size: 16px;
 }
 
+/* logo ina */
 .imgLogo {
     width: 100PX;
 }
 
-
-.nodes-container {
+/* container des nodes */
+.nodesContainer {
     display: flex;
     flex-direction: column;
     align-items: flex-start; /* Alignement à gauche */

@@ -8,6 +8,9 @@ import { Observable } from 'rxjs';
 export class AuthService {
 
 
+  // Ce service fais le liens entre le server et body.component.ts
+
+
   private apiUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) {}
@@ -21,8 +24,8 @@ export class AuthService {
 
 
   // change le password via une api request sur /change-password, envoie les données entrer par l'user
-  changePassword(username: string, oldPassword: string, newPassword: string): Observable<any> {
+  changePassword(username: string , newPassword: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(`${this.apiUrl}/change-password`, { username, oldPassword, newPassword }, { headers, responseType: 'text' as 'json' });
+    return this.http.post<any>(`${this.apiUrl}/change-password`, { username, newPassword }, { headers, responseType: 'text' as 'json' });
   }
 }
