@@ -3,7 +3,7 @@ import { ErrorComponent } from './error.component';
 import { ErrorService } from '../../services/error.service';
 import { BehaviorSubject } from 'rxjs';
 
-describe('ErrorComponent Unit Test', () => {
+describe('ErrorComponent Test Unitaire', () => {
   let component: ErrorComponent;
   let fixture: ComponentFixture<ErrorComponent>;
   let errorService: ErrorService;
@@ -30,7 +30,7 @@ describe('ErrorComponent Unit Test', () => {
     fixture.detectChanges();
   });
 
-  it('TEST INITIAL si component est crée', () => {
+  it('TEST INITIAL si ErrorComponent est crée', () => {
     expect(component).toBeTruthy();
   });
 

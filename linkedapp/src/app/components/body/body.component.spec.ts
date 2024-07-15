@@ -3,15 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BodyComponent } from './body.component';
-import { ValidationService } from '../../services/password.service';
+import { NodeService } from '../../services/nodes.service';
 import { ErrorService } from '../../services/error.service';
 import { AuthService } from '../../services/auth.service';
 import { of, throwError } from 'rxjs';
 
-describe('BodyComponent Unit Test', () => { // cree un bodycomponent test
+describe('BodyComponent Test Unitaire', () => { // cree un bodycomponent test
   let component: BodyComponent;
   let fixture: ComponentFixture<BodyComponent>;
-  let validationService: ValidationService; 
+  let nodeService: NodeService; 
   let errorService: ErrorService;
   let authService: AuthService;
 
@@ -22,19 +22,19 @@ describe('BodyComponent Unit Test', () => { // cree un bodycomponent test
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BodyComponent, FormsModule, FontAwesomeModule, HttpClientTestingModule],
-      providers: [ValidationService, ErrorService, AuthService]
+      providers: [NodeService, ErrorService, AuthService]
     }).compileComponents();
 
     // test bed est une func angular pour setup un environnement de test
     fixture = TestBed.createComponent(BodyComponent);
     component = fixture.componentInstance;
-    validationService = TestBed.inject(ValidationService);
+    nodeService = TestBed.inject(NodeService);
     errorService = TestBed.inject(ErrorService);
     authService = TestBed.inject(AuthService);
     fixture.detectChanges();
   });
 
-  it('TEST INITIAL si component est crée', () => {
+  it('TEST INITIAL si BodyComponent est crée', () => {
     expect(component).toBeTruthy();
   }); 
 

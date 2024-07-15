@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ValidationService } from '../../services/password.service';
+import { NodeService } from '../../services/nodes.service';
 import { ErrorService } from '../../services/error.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -33,13 +33,13 @@ export class BodyComponent implements OnInit {
   isSpecialCharValid: boolean = false;
 
   constructor(   // permet d'utiliser les service via dependency injection - DI
-    private validationService: ValidationService,
+    private nodeService: NodeService,
     private errorService: ErrorService,
     private authService: AuthService
   ) {}
 
   ngOnInit() { // s'abonne au changement du service ce lance au demarrage
-    this.validationService.validationStateObservable.subscribe(state => {
+    this.nodeService.nodeState$.subscribe(state => {
       this.isMinLengthValid = state.isMinLengthValid;
       this.isLowerCaseValid = state.isLowerCaseValid;
       this.isUpperCaseValid = state.isUpperCaseValid;
@@ -101,7 +101,7 @@ export class BodyComponent implements OnInit {
                 this.confirmPassword = "";
 
                 // Reset les nodes de validation
-                this.validationService.resetValidationState();
+                this.nodeService.resetNodeState();
               },
               error => {
                 console.error('Password change failed', error);
@@ -118,7 +118,7 @@ export class BodyComponent implements OnInit {
 
   updateNodes() { // Mettre à jour les états de validation des nodes, test les conditions et envoie des booleans
     const password = this.newPassword || ''; // Utiliser le mot de passe actuel
-    this.validationService.updateValidationState({
+    this.nodeService.updateNodeState({
       isMinLengthValid: password.length >= 8,
       isLowerCaseValid: /[a-z]/.test(password),
       isUpperCaseValid: /[A-Z]/.test(password),

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NodeComponent } from '../node/node.component';
-import { ValidationService } from '../../services/password.service';
+import { NodeService } from '../../services/nodes.service';
 
 @Component({
   selector: 'app-header',
@@ -17,10 +17,10 @@ export class HeaderComponent implements OnInit {
   isDigitValid = false;
   isSpecialCharValid = false;
 
-  constructor(private validationService: ValidationService) {} // import le service
+  constructor(private nodeService: NodeService) {} // import le service
 
   ngOnInit() { // ce lance a l initialisation et s'abonne au changement des nodes
-    this.validationService.validationStateObservable.subscribe(state => {
+    this.nodeService.nodeState$.subscribe(state => {
       this.isMinLengthValid = state.isMinLengthValid;
       this.isLowerCaseValid = state.isLowerCaseValid;
       this.isUpperCaseValid = state.isUpperCaseValid;
