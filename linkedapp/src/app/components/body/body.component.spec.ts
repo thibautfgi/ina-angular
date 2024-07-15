@@ -8,19 +8,24 @@ import { ErrorService } from '../../services/error.service';
 import { AuthService } from '../../services/auth.service';
 import { of, throwError } from 'rxjs';
 
-describe('BodyComponent', () => { // cree un bodycomponent
+describe('BodyComponent Unit Test', () => { // cree un bodycomponent test
   let component: BodyComponent;
   let fixture: ComponentFixture<BodyComponent>;
-  let validationService: ValidationService;
+  let validationService: ValidationService; 
   let errorService: ErrorService;
   let authService: AuthService;
 
+  // fixture permet d'interagir avec la template et son componenet pour test
+  //fixture permet donc une interaction avec tt le visuel : exemple si un button change bien de couleur, ect...
+
+  // run avant chaque test pour setup le test local et injecter les autres components/services
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BodyComponent, FormsModule, FontAwesomeModule, HttpClientTestingModule],
       providers: [ValidationService, ErrorService, AuthService]
     }).compileComponents();
 
+    // test bed est une func angular pour setup un environnement de test
     fixture = TestBed.createComponent(BodyComponent);
     component = fixture.componentInstance;
     validationService = TestBed.inject(ValidationService);
@@ -29,8 +34,79 @@ describe('BodyComponent', () => { // cree un bodycomponent
     fixture.detectChanges();
   });
 
+  it('TEST INITIAL si component est crée', () => {
+    expect(component).toBeTruthy();
+  }); 
 
-  it('should show error if new password matches old password', () => {
+  it("TEST BUTTON si le button valide lance bien la function onSubmit() ", () => {
+    spyOn(component, 'onSubmit')
+    const button = fixture.nativeElement.querySelector('.confirmButton');
+    button.click();
+    expect(component.onSubmit).toHaveBeenCalled();
+  });
+
+  it("TEST VISUEL si error message est vide/invisible a l'initialisation", () => {
+    
+    const errorPlace = fixture.nativeElement.querySelector('.errorPlace');
+    
+    expect(errorPlace).not.toBeNull();
+
+    // regarde les deux classes de errorComponent template et verifie qu'elle sont vide
+    const errorMessages = errorPlace.querySelectorAll('.errorMessage');
+    const successMessages = errorPlace.querySelectorAll('.succesMessage');
+
+    expect(errorMessages.length).toBe(0);
+    expect(successMessages.length).toBe(0);
+  });
+
+  it("TEST VISUEL si formBodyContaineur est présent", () => {
+    const formBodyContaineur = fixture.nativeElement.querySelector('.formBodyContaineur');
+    expect(formBodyContaineur).not.toBeNull();
+  })
+
+  it("TEST VISUEL si 4 formContaineur sont présent", () => {
+    const formContaineur = fixture.nativeElement.querySelectorAll('.formContaineur');
+    expect(formContaineur.length).toBe(4);
+  })
+
+  it("TEST VISUEL si 4 inputGroupContaineurs sont présent", () => {
+    const inputGroupContaineurs = fixture.nativeElement.querySelectorAll('.inputGroupContaineur');
+    expect(inputGroupContaineurs.length).toBe(4);
+  });
+
+  it("TEST VISUEL si 4 inputIconContaineurs sont présent", () => {
+    const inputIconContaineurs = fixture.nativeElement.querySelectorAll('.inputIconContaineur');
+    expect(inputIconContaineurs.length).toBe(4); 
+  });
+
+  it("TEST VISUEL si 4 confirmButton sont présent", () => {
+    const confirmButton = fixture.nativeElement.querySelector('.confirmButton');
+    expect(confirmButton).not.toBeNull();
+  });
+
+  it("TEST VISUEL si 4 form-control sont présent", () => {
+    const formControls = fixture.nativeElement.querySelectorAll('.form-control');
+    expect(formControls.length).toBe(4); 
+  });
+
+
+  it('TEST FONCTION verifyAuth() devrais avoir ete appeler quand onSubmit() appeller', () => {
+
+    spyOn(authService, 'verifyAuth').and.returnValue(of({}));
+
+    component.username = 'testuser';
+    component.oldPassword = 'oldpassword';
+    component.newPassword = 'newpassword';
+    component.confirmPassword = 'newpassword';
+ 
+    component.onSubmit();
+    expect(authService.verifyAuth).toHaveBeenCalledWith('testuser', 'oldpassword');
+
+  });
+  
+
+  it('TEST FONCTION montre un error Message onSubmit() si lancien et le nouveau password match ', () => {
+
     spyOn(authService, 'verifyAuth').and.returnValue(of({ message: 'Credentials are valid' }));
     spyOn(errorService, 'updateErrorState');
     component.username = 'testuser';
@@ -41,17 +117,15 @@ describe('BodyComponent', () => { // cree un bodycomponent
     expect(errorService.updateErrorState).toHaveBeenCalledWith({ showErrorSamePassword: true });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  }); 
 
-  it('should reset error state on submit', () => {
+
+  it('TEST FONCTION devrais resset le error Message onSubmit()', () => {
     spyOn(errorService, 'resetErrorState');
     component.onSubmit();
     expect(errorService.resetErrorState).toHaveBeenCalled();
   });
 
-  it('should show error if any field is empty', () => {
+  it('TEST FONCTION montre un error Message onSubmit() si champs vide ', () => {
     spyOn(errorService, 'updateErrorState');
     component.username = '';
     component.oldPassword = '';
@@ -61,17 +135,8 @@ describe('BodyComponent', () => { // cree un bodycomponent
     expect(errorService.updateErrorState).toHaveBeenCalledWith({ showErrorChampsEmpty: true });
   });
 
-  it('should call verifyAuth on submit', () => {
-    spyOn(authService, 'verifyAuth').and.returnValue(of({ message: 'Credentials are valid' }));
-    component.username = 'testuser';
-    component.oldPassword = 'oldPassword';
-    component.newPassword = 'NewPassword123!';
-    component.confirmPassword = 'NewPassword123!';
-    component.onSubmit();
-    expect(authService.verifyAuth).toHaveBeenCalledWith('testuser', 'oldPassword');
-  });
 
-  it('should show error if credentials are invalid', () => {
+  it('TEST FONCTION montre un error Message onSubmit() si les login sont incorrect', () => {
     spyOn(authService, 'verifyAuth').and.returnValue(throwError('Invalid credentials'));
     spyOn(errorService, 'updateErrorState');
     component.username = 'testuser';
@@ -84,23 +149,18 @@ describe('BodyComponent', () => { // cree un bodycomponent
 
 
 
-  it('Expects a 6', () => {
-    let calc = 2+3;
-    expect(calc).toBe(5);
-  });
-
-  it('should show error if new password does not meet security criteria', () => {
+  it('TEST FONCTION montre un error Message onSubmit() si le nouveaux mdp est pas assez securiser', () => {
     spyOn(authService, 'verifyAuth').and.returnValue(of({ message: 'Credentials are valid' }));
     spyOn(errorService, 'updateErrorState');
     component.username = 'testuser';
     component.oldPassword = 'oldPassword';
-    component.newPassword = 'short';
-    component.confirmPassword = 'short';
+    component.newPassword = 'Azerty1';
+    component.confirmPassword = 'Azerty1';
     component.onSubmit();
     expect(errorService.updateErrorState).toHaveBeenCalledWith({ showErrorSecurityPassword: true });
   });
 
-  it('should show error if new password and confirm password do not match', () => {
+  it('TEST FONCTION montre un error Message onSubmit() si le nouveaux et le confirm password ne match pas', () => {
     spyOn(authService, 'verifyAuth').and.returnValue(of({ message: 'Credentials are valid' }));
     spyOn(errorService, 'updateErrorState');
     component.username = 'testuser';
@@ -111,7 +171,7 @@ describe('BodyComponent', () => { // cree un bodycomponent
     expect(errorService.updateErrorState).toHaveBeenCalledWith({ showErrorMatchPassword: true });
   });
 
-  it('should call changePassword if all criteria are met', () => {
+  it('TEST FONCTION montre un succes Message onSubmit() si tout les critères sont remplis', () => {
     spyOn(authService, 'verifyAuth').and.returnValue(of({ message: 'Credentials are valid' }));
     spyOn(authService, 'changePassword').and.returnValue(of({ message: 'Password changed successfully' }));
     component.username = 'testuser';
