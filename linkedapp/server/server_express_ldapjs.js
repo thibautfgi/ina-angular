@@ -20,7 +20,7 @@ app.use(express.json());
 app.post('/verify-auth', (req, res) => {
   const { username, password } = req.body;
 
-  console.log('Received auth request:', { username, password }); // c'est pas très secure non???
+  console.log('Received auth request:', { username}); // c'est pas très secure non???
 
   // ldapClient.bind = essaye de ce connecter avec les login + mdp et renvoie une reponse
   ldapClient.bind(`cn=${username},ou=users,dc=mycompany,dc=com`, password, (err) => {
@@ -69,6 +69,19 @@ app.post('/change-password', (req, res) => {
 
     res.json({ message: 'Password changed successfully' });
   });
+});
+
+
+// Middleware to handle 404 errors
+app.use((req, res) => {
+  res.status(404).json({ message: 'Not Found' });
+  console.error('404 Not Found:', req.originalUrl);
+});
+
+// Global error handling middleware
+app.use((err, res) => {
+  res.status(500).json({ message: 'Internal Server Error' });
+  console.error('Unexpected server error:', err);
 });
 
 // run le express/ldapjs server
