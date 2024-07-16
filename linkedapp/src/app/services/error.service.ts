@@ -23,7 +23,9 @@ export class ErrorService {
 // $ convention, designe un observable, permet au autre
 // parties de l'app peuvent s'abonner  
   private errorStateSubject = new BehaviorSubject(this.errorState);
-  errorState$ = this.errorStateSubject.asObservable(); 
+  // A variant of Subject that requires an initial value and emits its current value whenever it is subscribed to.
+  errorState$ = this.errorStateSubject.asObservable();  
+  // on peut s'abonner a cette observable pour recevoir les maj de errorstate
 
   
   // fais une update du msg d'erreur ...??
@@ -43,7 +45,7 @@ export class ErrorService {
       showErrorMatchPassword: false,
       showSucces: false
     };
-    this.errorStateSubject.next(this.errorState);
+    this.errorStateSubject.next(this.errorState); // next = emet cet etats de errorstate
   }
 
 }

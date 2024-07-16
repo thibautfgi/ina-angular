@@ -7,6 +7,7 @@ import { NodeService } from '../../services/nodes.service';
 import { ErrorService } from '../../services/error.service';
 import { AuthService } from '../../services/auth.service';
 import { of, throwError } from 'rxjs';
+import { By } from '@angular/platform-browser';
 
 describe('BodyComponent Test Unitaire', () => { // cree un bodycomponent test
   let component: BodyComponent;
@@ -181,4 +182,6 @@ describe('BodyComponent Test Unitaire', () => { // cree un bodycomponent test
     component.onSubmit();
     expect(authService.changePassword).toHaveBeenCalledWith('testuser', 'NewPassword123!');
   });
+
+
 });
