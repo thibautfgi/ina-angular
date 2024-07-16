@@ -102,10 +102,6 @@ export class BodyComponent implements OnInit {
 
                 // Reset les nodes de validation
                 this.nodeService.resetNodeState();
-              },
-              error => {
-                console.error('Password change failed', error);
-                this.errorService.updateErrorState({ showErrorLogin: true });
               }
             );
         },
@@ -117,7 +113,7 @@ export class BodyComponent implements OnInit {
   }
 
   updateNodes() { // Mettre à jour les états de validation des nodes, test les conditions et envoie des booleans
-    const password = this.newPassword || ''; // Utiliser le mot de passe actuel
+    const password = this.newPassword; // Utiliser le mot de passe actuel
     this.nodeService.updateNodeState({
       isMinLengthValid: password.length >= 8,
       isLowerCaseValid: /[a-z]/.test(password),

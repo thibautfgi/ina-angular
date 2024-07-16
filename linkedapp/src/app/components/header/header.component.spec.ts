@@ -80,6 +80,40 @@ describe('HeaderComponent Test Unitaire', () => {
 
 
    // TODO: FIX ME 
+   it('AAAAAA', () => {
+    // node initial en bleu
+  
+    nodeService.resetNodeState();
+    fixture.detectChanges();
+
+    const nodes = fixture.debugElement.queryAll(By.css('app-node'));
+
+  
+    expect(nodes.length).toBe(5);
+    nodes.forEach(node => {
+      const iconElement = node.nativeElement;
+      expect(iconElement).not.toBeNull();
+      const color = getComputedStyle(iconElement).color;
+      expect(color).toBe('rgb(0, 171, 202)'); // Blue color
+    });
+
+    //reset manuel (pb avec les fct calls de service node)
+
+    fixture.detectChanges();
+
+    // verify si les booleans on bien placer les nodes en rouges
+    nodes.forEach(node => {
+      const iconElement = node.nativeElement;
+      expect(iconElement).not.toBeNull();
+      const color = getComputedStyle(iconElement).color;
+      expect(color).toBe('rgb(255, 0, 0))'); // Blue color
+    });
+
+  });
+  
+
+
+   // TODO: FIX ME 
    it('TEST FONCTION change de couleur / all false si les nodes sont remise a zero', () => {
     // node initial en bleu
   
