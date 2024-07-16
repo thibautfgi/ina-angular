@@ -1,7 +1,41 @@
 angular lurning 
 
+**MAIN APP**
 
-for second-app you need to execute =
+>go into linkedapp/docker-openldap
+
+```
+Docker-compose up
+```
+
+> or
+
+```
+docker pull osixia/openldap:latest
+```
+
+then run docker-compose up
+
+
+>go into linkedapp/server
+
+```
+node server_express_ldapjs.js
+```
+
+>go into linkedapp/
+
+```
+ng serve
+```
+
+
+
+
+
+
+**OLD**
+>for second-app you need to execute =
 
 ```
 ng add @fortawesome/angular-fontawesome
