@@ -80,7 +80,7 @@ describe('HeaderComponent Test Unitaire', () => {
 
 
    // TODO: FIX ME 
-   it('AAAAAA', () => {
+   it('Rip me', () => {
     // node initial en bleu
   
     nodeService.resetNodeState();
