@@ -1,5 +1,5 @@
 {
-  "name": "libav",
+  "name": "ffmcdur",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:libav": "node dist/libav/server/server.mjs"
+    "serve:ssr:ffmcdur": "node dist/ffmcdur/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -22,12 +22,8 @@
     "@angular/router": "^18.1.0",
     "@angular/ssr": "^18.1.0",
     "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
-    "@libav.js/variant-default": "^5.4.6",
-    "@libav.js/variant-webm-vp9": "^5.4.6",
     "express": "^4.18.2",
     "fluent-ffmpeg": "^2.1.3",
-    "libav.js": "^5.4.6",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"

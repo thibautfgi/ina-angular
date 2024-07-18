@@ -1,6 +1,12 @@
+// src/main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { AppComponent } from './app/app.component';
+import { provideHttpClient } from '@angular/common/http';
+import { VideoComponent } from './app/components/video/video.component';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(VideoComponent, {
+  providers: [
+    { provide: 'API_URL', useValue: 'http://localhost:3000' },
+    provideHttpClient()
+  ]
+})
+  .catch(err => console.error(err));

@@ -1,14 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FrameComponent } from "./components/frame/frame.component";
+import { VideoComponent } from './components/video/video.component';
+
+
+// component principal de l'app
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FrameComponent],
+  imports: [RouterOutlet, VideoComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
+
 export class AppComponent {
-  title = 'libav';
+  
 }

@@ -1,0 +1,10 @@
+<h1>Probe Video</h1>
+<p *ngIf="metadata">
+  Format: {{ metadata.format.format_name }}<br>
+  Duration: {{ metadata.format.duration }}<br>
+  Size: {{ metadata.format.size }}<br>
+  Bit rate: {{ metadata.format.bit_rate }}<br>
+  Width: {{ metadata.streams[0].width }}<br>
+  Height: {{ metadata.streams[0].height }}<br>
+</p>
+<p *ngIf="error">{{ error }}</p>
