@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frame Extraction Example</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Frame Extraction</h1>
+
+    <!-- Embedded video player for playback -->
+    <video width="640" height="360" controls>
+        <source src="assets/video/sample640X360.webm" type='video/webm; codecs="vp9"'>
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Canvas for displaying the extracted frame -->
+    <canvas id="videoCanvas"></canvas>
+
+    <!-- load ici le script libav -->
+    <script type="text/javascript" src="assets/libav/libav-5.4.6.1.1-webm-vp9.js"></script>
+
+
+    <script type="text/javascript">
+
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+
+                // initialise libav
+                const libav = await LibAV.LibAV();
+
+                // fetch la video
+                const videoData = await fetch("assets/video/sample640X360.webm").then(response => response.arrayBuffer());
+                await libav.writeFile("sample640X360.webm", new Uint8Array(videoData));
+
+                // demuxer la video = separe en plusieur canal (video, audio...)
+                const [fmt_ctx, [stream]] = await libav.ff_init_demuxer_file("sample640X360.webm");
+
+                console.log(stream)
+
+
+                // initilise le decoder pour lire la partie video demuxer
+                const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
+
+
+                // lis les frames en packets puis les decodes en frames
+                const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, packet);
+                const frames = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
+                console.log(`Extracted ${frames.length} frames from the video!`); //le nbr de frames extrait de la vid
+
+
+                // l'emplacement de notre frame
+                const canvas = document.getElementById('videoCanvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 640;
+                canvas.height = 360;
+
+
+                // le bazard pour cree une image
+                if (frames.length > 0 && frames[0].data) {
+                    const firstFrame = frames[0];
+                    console.log('First frame:', firstFrame);
+                    console.log('Frame layout:', firstFrame.layout);
+
+                    // si je regarde dans firstframe.layout j'ai tt les donne que jutilise ensuite pour cree une image
+                    const yPlane = firstFrame.data.subarray(firstFrame.layout[0].offset, firstFrame.layout[0].offset + firstFrame.layout[0].stride * firstFrame.height);
+
+                    const imgData = ctx.createImageData(firstFrame.width, firstFrame.height);
+                    for (let y = 0; y < firstFrame.height; y++) {
+                        for (let x = 0; x < firstFrame.width; x++) {
+                            const yIndex = y * firstFrame.layout[0].stride + x;
+                            const imgIndex = y * firstFrame.width + x;
+                            const value = yPlane[yIndex];
+                            imgData.data[imgIndex * 4] = value;       // R
+                            imgData.data[imgIndex * 4 + 1] = value;   // G
+                            imgData.data[imgIndex * 4 + 2] = value;   // B
+                            imgData.data[imgIndex * 4 + 3] = 255;     // A
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                } else {
+                    console.error("No frames available to display or data is not accessible");
+                }
+            } catch (error) {
+                console.error("Failed to load or process the video:", error);
+            }
+        });
+    </script>
+</body>
+</html>
