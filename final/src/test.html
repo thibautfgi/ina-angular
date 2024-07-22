@@ -54,17 +54,21 @@
                 console.log(`Extracted ${frames.length} frames from the video!`); //le nbr de frames extrait de la vid
 
 
+                const firstFrame = frames[0];
+
                 // l'emplacement de notre frame
                 const canvas = document.getElementById('videoCanvas');
                 const ctx = canvas.getContext('2d');
-                canvas.width = 640;
-                canvas.height = 360;
+                canvas.width = firstFrame.width;
+                canvas.height = firstFrame.height;
 
 
                 // le bazard pour cree une image
                 if (frames.length > 0 && frames[0].data) {
-                    const firstFrame = frames[0];
                     console.log('First frame:', firstFrame);
+
+                    // This is a Uint8Array containing all the raw data for the frame. 
+                    // This array includes data for all the planes (Y, U, and V) concatenated together.
                     console.log('Frame layout:', firstFrame.layout);
 
                     // si je regarde dans firstframe.layout j'ai tt les donne que jutilise ensuite pour cree une image
