@@ -1,0 +1,4 @@
+/* src/app/video-frame-extraction/video-frame-extraction.component.css */
+canvas {
+    border: 1px solid black;
+}

@@ -1,0 +1,12 @@
+<h1>Video Frame Extraction</h1>
+
+<!-- Embedded video player for playback -->
+<video width="640" height="360" controls>
+  <source [attr.src]="'assets/video/' + videoName" type='video/webm; codecs="vp9"'>
+  Your browser does not support the video tag.
+</video>
+
+
+
+<!-- Canvas for displaying the extracted frame -->
+<canvas id="videoCanvas"></canvas>
