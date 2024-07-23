@@ -1,5 +1,7 @@
 import { Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { isPlatformBrowser, NgFor } from '@angular/common';
+import { Observable } from 'rxjs';
+import { FramesDrawersService } from '../../services/frames-drawers.service';
 
 declare var LibAV: any;
 
@@ -12,20 +14,32 @@ declare var LibAV: any;
 })
 export class FramesDrawerComponent implements OnInit {
 
-  frameNumber = 299;  // select the frame number here
-  moduloNumber = 10; // la base du modulo pour avoir le nbr de frame du storyboard (ici / 10 soit 100frames = 10storyboard)
-  videoName = "sample960x400-0.47s.webm"; // la vidéo a extraire
+  moduloNumber = 10; // la base du modulo pour avoir le nbr de frame du storyboard (ici / 10 soit 100frames = 10storyboard
+  videoName$: Observable<string>;
+  videoName?: string;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: any) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: any,
+    private framesDrawersService : FramesDrawersService,
+  ) {
+    this.videoName$ = this.framesDrawersService.videoName$; // import le nom de la video from frame service
+  }
 
-  async ngOnInit() { // au demarrage
+  ngOnInit() { // au demarrage
     // load ce script sur le browser uniquement
     if (isPlatformBrowser(this.platformId)) {
-      const script = document.createElement('script');
-      script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
-      script.onload = () => this.initLibAV();
-      document.body.appendChild(script);
+      this.videoName$.subscribe(name => {
+        this.videoName = name;
+        this.loadLibAV();
+      });
     }
+  }
+
+  loadLibAV() {
+    const script = document.createElement('script');
+    script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
+    script.onload = () => this.initLibAV();
+    document.body.appendChild(script);
   }
 
   async initLibAV() {
