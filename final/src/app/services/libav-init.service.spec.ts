@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { FramesDrawersService } from './frames-drawers.service';
+import { LibavInitService } from './libav-init.service';
 
-describe('FramesDrawersService', () => {
-  let service: FramesDrawersService;
+describe('LibavInitService', () => {
+  let service: LibavInitService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(FramesDrawersService);
+    service = TestBed.inject(LibavInitService);
   });
 
   it('should be created', () => {
