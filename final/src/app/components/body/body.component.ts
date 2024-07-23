@@ -3,11 +3,12 @@ import { LibavInitService } from '../../services/libav-init.service';
 import { AsyncPipe, isPlatformBrowser } from '@angular/common';
 import { StoryBoardComponent } from '../story-board/story-board.component';
 import { Observable, Subscription } from 'rxjs';
+import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-body',
   standalone: true,
-  imports: [AsyncPipe, StoryBoardComponent],
+  imports: [AsyncPipe, StoryBoardComponent, HeaderComponent],
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
@@ -26,31 +27,16 @@ export class BodyComponent implements OnInit, OnDestroy {
     this.moduloNumber$ = this.libavInitService.moduloNumber$;
   }
 
-  ngOnInit() { 
+
+  async ngOnInit() { // au demarrage
+    // load ce script sur le browser uniquement
     if (isPlatformBrowser(this.platformId)) {
-      this.loadLibAV();
+      const script = document.createElement('script');
+      script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
+      script.onload = () => this.libavInitService.initLibAV();
+      document.body.appendChild(script);
     }
-  }
-
-  loadLibAV() {
-    const script = document.createElement('script');
-    script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
-    script.onload = () => {
-      const videoNameSub = this.videoName$.subscribe(async videoName => {
-        const moduloNumberSub = this.moduloNumber$.subscribe(async moduloNumber => {
-          try {
-            await this.libavInitService.initLibAV(videoName, moduloNumber);
-          } catch (error) {
-            console.error('Error initializing storyboard:', error);
-          }
-        });
-        this.subscriptions.add(moduloNumberSub);
-      });
-      this.subscriptions.add(videoNameSub);
-    };
-    document.body.appendChild(script);
-  }
-
+  }  
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }

@@ -7,28 +7,29 @@ declare var LibAV: any;
   providedIn: 'root'
 })
 export class LibavInitService {
+
   private videoName = new BehaviorSubject<string>("sample640x360.webm");
   private moduloNumber = new BehaviorSubject<number>(10);
-  private frames = new BehaviorSubject<any[]>([]);
+  private videoFrames = new BehaviorSubject<any[]>([]);
 
   videoName$: Observable<string> = this.videoName.asObservable();
   moduloNumber$: Observable<number> = this.moduloNumber.asObservable();
-  frames$: Observable<any[]> = this.frames.asObservable();
+  videoFrames$: Observable<any[]> = this.videoFrames.asObservable();
 
   constructor() { }
 
-  setVideoName(newName: string): void {
-    this.videoName.next(newName);
-  }
-
-  async initLibAV(videoName: string, moduloNumber: number) {
+  async initLibAV() {
     try {
       console.time("Temps Total");
+
+      // Get current values from BehaviorSubjects
+      const videoName = this.videoName.getValue();
+      const moduloNumber = this.moduloNumber.getValue();
 
       // Initialize LibAV
       const libav = await LibAV.LibAV();
 
-      // Fetch la video
+      // Fetch the video
       console.log("Starting Fetch...");
       console.time("Temps de Fetch");
       const videoData = await fetch(`assets/video/${videoName}`)
@@ -56,10 +57,16 @@ export class LibavInitService {
       const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
 
       console.log(`Extracted ${framesData.length} frames from the video!`);
-
       console.timeEnd("Lis et decode les frames");
+      console.timeEnd("Temps Total");
 
-      this.frames.next(framesData.map((frame: any, index: number) => ({ ...frame, index })));
+      this.videoFrames.next(framesData);
+
+      console.log("------------------");
+      console.log("Frame info = " + frames);
+      console.log("Modulo number = " + moduloNumber);
+      console.log("Video name = " + videoName);
+      console.log("------------------");
 
     } catch (error) {
       console.error('Failed to load or process the video:', error);
