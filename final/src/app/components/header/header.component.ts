@@ -15,7 +15,6 @@ export class HeaderComponent {
   videoName$: Observable<string>;
 
 
-  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private libavInitService: LibavInitService,

@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { LibavInitService } from '../../services/libav-init.service';
 import { AsyncPipe, isPlatformBrowser } from '@angular/common';
 import { StoryBoardComponent } from '../story-board/story-board.component';
@@ -12,12 +12,12 @@ import { HeaderComponent } from '../header/header.component';
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
-export class BodyComponent implements OnInit, OnDestroy {
+export class BodyComponent implements OnInit{
 
   videoName$: Observable<string>;
   moduloNumber$: Observable<number>;
 
-  private subscriptions: Subscription = new Subscription();
+
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
@@ -37,7 +37,9 @@ export class BodyComponent implements OnInit, OnDestroy {
       document.body.appendChild(script);
     }
   }  
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
+
+
+
+
+
 }
