@@ -8,7 +8,7 @@ declare var LibAV: any;
 })
 export class LibavInitService {
 
-  private videoName = new BehaviorSubject<string>("sample640x360.webm"); //video a utiliser
+  private videoName = new BehaviorSubject<string>("sample960x400-0.47s.webm"); //video a utiliser
   private moduloNumber = new BehaviorSubject<number>(10); //le nbr de frame selectionner depend du modulo, ici 10 = 100frame = 10final
   private customHeight = new BehaviorSubject<number>(150); //tailler hauteur img
   private customWidht = new BehaviorSubject<number>(300); // taille largeur img
@@ -32,6 +32,9 @@ export class LibavInitService {
 
       const videoName = this.videoName.getValue();
       const moduloNumber = this.moduloNumber.getValue();
+
+      const customHeight = this.customHeight.getValue();
+      const customWidht = this.customWidht.getValue();
 
       const libav = await LibAV.LibAV();
 
@@ -61,20 +64,24 @@ export class LibavInitService {
       console.time("Lis et decode les frames");
       const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, packet);
       const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
+      console.timeEnd("Lis et decode les frames");
+      console.timeEnd("Temps Init");
 
       console.log(`Extracted ${framesData.length} frames from the video!`);
       this.framesNumber.next(framesData.length);
+      const framesNumber = this.framesNumber.getValue();
 
-      console.timeEnd("Lis et decode les frames");
-      console.timeEnd("Temps Init");
 
       this.videoFrames.next(framesData);
 
 
       console.log("------------------");
       console.log("Frame info = too long but here");
+      console.log("Frame Number = " + framesNumber);
       console.log("Modulo number = " + moduloNumber);
       console.log("Video name = " + videoName);
+      console.log("customHeight = " + customHeight)
+      console.log("costome widht = "+ customWidht)
       console.log("------------------");
 
     } catch (error) {

@@ -45,7 +45,11 @@ export class StoryBoardComponent implements OnInit {
                 if (videoFrames !== null) {
                   this.customHeight$.subscribe(customHeight => {
                     this.customWidht$.subscribe(customWidth => {
+                      console.log("Starting Draw frame...");
+                     
                       this.buildStoryBoard(framesNumber, moduloNumber, videoFrames, customHeight, customWidth);
+                      console.timeEnd("Draw frame");
+                      
                     });
                   });
                 } else {
@@ -66,6 +70,7 @@ export class StoryBoardComponent implements OnInit {
   }
 
   buildStoryBoard(framesNumber: number, moduloNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
+    console.time("Draw frame");
     const frameToPrint = Math.floor(framesNumber / moduloNumber);
     const numberOfRows = Math.ceil(frameToPrint / 5); // Calculate number of rows tto containe the img
 
