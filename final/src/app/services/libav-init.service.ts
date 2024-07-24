@@ -8,16 +8,20 @@ declare var LibAV: any;
 })
 export class LibavInitService {
 
-  private videoName = new BehaviorSubject<string>("sample640x360.webm");
-  private moduloNumber = new BehaviorSubject<number>(10);
+  private videoName = new BehaviorSubject<string>("sample640x360.webm"); //video a utiliser
+  private moduloNumber = new BehaviorSubject<number>(10); //le nbr de frame selectionner depend du modulo, ici 10 = 100frame = 10final
+  private customHeight = new BehaviorSubject<number>(150); //tailler hauteur img
+  private customWidht = new BehaviorSubject<number>(300); // taille largeur img
+  
   private videoFrames = new BehaviorSubject<any[]>([]);
-  private framesNumber = new BehaviorSubject<number>(0);
-
+  private framesNumber = new BehaviorSubject<any>(null);  // Initialize with null
 
   videoName$: Observable<string> = this.videoName.asObservable();
   moduloNumber$: Observable<number> = this.moduloNumber.asObservable();
   videoFrames$: Observable<any[]> = this.videoFrames.asObservable();
-  framesNumber$: Observable<number> = this.framesNumber.asObservable();
+  framesNumber$: Observable<any> = this.framesNumber.asObservable();
+  customHeight$: Observable<any> = this.customHeight.asObservable();
+  customWidht$: Observable<any> = this.customWidht.asObservable();
 
 
   constructor() { }
@@ -26,16 +30,11 @@ export class LibavInitService {
     try {
       console.time("Temps Init");
 
-      // Get current values from BehaviorSubjects
-
       const videoName = this.videoName.getValue();
       const moduloNumber = this.moduloNumber.getValue();
 
-
-      // Initialize LibAV
       const libav = await LibAV.LibAV();
 
-      // Fetch the video
       console.log("Starting Fetch...");
       console.time("Temps de Fetch");
       const videoData = await fetch(`assets/video/${videoName}`)
@@ -52,6 +51,7 @@ export class LibavInitService {
       const [fmt_ctx, [stream]] = await libav.ff_init_demuxer_file(videoName);
       console.timeEnd("Demuxe");
 
+
       console.log("Starting Decode...");
       console.time("Decode");
       const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
@@ -63,21 +63,16 @@ export class LibavInitService {
       const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
 
       console.log(`Extracted ${framesData.length} frames from the video!`);
-      this.framesNumber.next(framesData.length)
+      this.framesNumber.next(framesData.length);
 
       console.timeEnd("Lis et decode les frames");
-
-      console.timeEnd("Temps Init")
+      console.timeEnd("Temps Init");
 
       this.videoFrames.next(framesData);
 
 
-      const videoFrame = this.videoFrames.getValue();
-
-   
-
       console.log("------------------");
-      console.log("Frame info = to long but here");
+      console.log("Frame info = too long but here");
       console.log("Modulo number = " + moduloNumber);
       console.log("Video name = " + videoName);
       console.log("------------------");
