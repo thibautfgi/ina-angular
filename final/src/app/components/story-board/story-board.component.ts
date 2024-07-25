@@ -118,7 +118,7 @@ export class StoryBoardComponent implements OnInit {
       
 
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d')!; // une img en 2d
       canvas.width = customWidth;
       canvas.height = customHeight;
 
@@ -139,7 +139,7 @@ export class StoryBoardComponent implements OnInit {
           const U = uPlane[uIndex] - 128;
           const V = vPlane[vIndex] - 128;
 
-          const R = Y + 1.402 * V;
+          const R = Y + 1.402 * V
           const G = Y - 0.344 * U - 0.714 * V;
           const B = Y + 1.772 * U;
 
@@ -153,7 +153,7 @@ export class StoryBoardComponent implements OnInit {
 
       // Create a temporary canvas to draw the original image
       const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d')!;
+      const tempCtx = tempCanvas.getContext('2d')!; // graphique 2D
       tempCanvas.width = displayFrame.width;
       tempCanvas.height = displayFrame.height;
       tempCtx.putImageData(imgData, 0, 0);
@@ -171,8 +171,8 @@ export class StoryBoardComponent implements OnInit {
 
       //font timecode
       ctx.font = '16px Arial';
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'black';
+      ctx.fillStyle = 'white'; //color du txt
+      ctx.strokeStyle = 'black'; // rebors du txt
       ctx.lineWidth = 2;
       ctx.strokeText(timecode, 10, 30); 
       ctx.fillText(timecode, 10, 30);

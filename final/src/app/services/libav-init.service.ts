@@ -6,23 +6,30 @@ declare var LibAV: any;
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class LibavInitService {
 
-  private videoName = new BehaviorSubject<string>("sample960x400-0.47s.webm"); //video a utiliser
+  private videoName = new BehaviorSubject<string>("sample640x360.webm"); //video a utiliser
   private moduloNumber = new BehaviorSubject<number>(10); //le nbr de frame selectionner depend du modulo, ici 10 = 100frame = 10final
   private customHeight = new BehaviorSubject<number>(150); //tailler hauteur img
   private customWidht = new BehaviorSubject<number>(300); // taille largeur img
   
   private videoFrames = new BehaviorSubject<any[]>([]);
-  private framesNumber = new BehaviorSubject<any>(null);  // Initialize with null
+  private framesNumber = new BehaviorSubject<number>(0);  // Initialize with null
+  private fps = new BehaviorSubject<number>(0); // Initialize with 0
+
+  
+  private duration = new BehaviorSubject<number>(0); // Initialize with null
 
   videoName$: Observable<string> = this.videoName.asObservable();
   moduloNumber$: Observable<number> = this.moduloNumber.asObservable();
   videoFrames$: Observable<any[]> = this.videoFrames.asObservable();
-  framesNumber$: Observable<any> = this.framesNumber.asObservable();
-  customHeight$: Observable<any> = this.customHeight.asObservable();
-  customWidht$: Observable<any> = this.customWidht.asObservable();
-
+  framesNumber$: Observable<number> = this.framesNumber.asObservable();
+  customHeight$: Observable<number> = this.customHeight.asObservable();
+  customWidht$: Observable<number> = this.customWidht.asObservable();
+  duration$: Observable<number> = this.duration.asObservable();
+  fps$: Observable<number> = this.fps.asObservable();
 
   constructor() { }
 
@@ -51,19 +58,36 @@ export class LibavInitService {
 
       console.log("Starting Demuxe...");
       console.time("Demuxe");
-      const [fmt_ctx, [stream]] = await libav.ff_init_demuxer_file(videoName);
+      const [fmt_ctx, streams] = await libav.ff_init_demuxer_file(videoName);
       console.timeEnd("Demuxe");
+
+      console.log("Streams: ", streams);
+
+
+
+     // Extract metadata using CLI commands to get fps
+    
+     console.log("Extracting metadata using CLI commands...");
+     const probeCommand = [
+       "-hide_banner",
+       "-i", videoName
+     ];
+    await libav.ffmpeg(probeCommand);
+
+
+
+
 
 
       console.log("Starting Decode...");
       console.time("Decode");
-      const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
+      const [, codecContext, packet, frame] = await libav.ff_init_decoder(streams[0].codec_id, streams[0].codecpar);
       console.timeEnd("Decode");
 
       console.log("Starting lis et decode les frames...");
       console.time("Lis et decode les frames");
       const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, packet);
-      const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
+      const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[streams[0].index], true);
       console.timeEnd("Lis et decode les frames");
       console.timeEnd("Temps Init");
 
@@ -71,17 +95,15 @@ export class LibavInitService {
       this.framesNumber.next(framesData.length);
       const framesNumber = this.framesNumber.getValue();
 
-
       this.videoFrames.next(framesData);
-
 
       console.log("------------------");
       console.log("Frame info = too long but here");
       console.log("Frame Number = " + framesNumber);
       console.log("Modulo number = " + moduloNumber);
       console.log("Video name = " + videoName);
-      console.log("customHeight = " + customHeight)
-      console.log("costome widht = "+ customWidht)
+      console.log("customHeight = " + customHeight);
+      console.log("customWidht = " + customWidht);
       console.log("------------------");
 
     } catch (error) {
