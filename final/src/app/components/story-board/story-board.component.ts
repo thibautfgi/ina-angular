@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Inject, PLATFORM_ID, input } from '@angular/core';
+import { Component, Input, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { LibavInitService } from '../../services/libav-init.service';
 import { Observable } from 'rxjs';
 import { AsyncPipe, isPlatformBrowser } from '@angular/common';
@@ -16,11 +16,9 @@ export class StoryBoardComponent implements OnInit {
   @Input() moduloNumber$: Observable<number>;
   @Input() videoFrames$!: Observable<any>;
   @Input() customHeight$: Observable<number>;
-  @Input() customWidht$: Observable<number>;
+  @Input() customWidth$: Observable<number>;
 
-
-
-  @Input() frameRate: number = 24; // frame rate by default, pb to get framerate on initlibav
+  @Input() frameRate: number = 30; // frame rate by default, pb to get framerate on initlibav
 
   constructor(
     private libavInitService: LibavInitService,
@@ -30,34 +28,26 @@ export class StoryBoardComponent implements OnInit {
     this.moduloNumber$ = this.libavInitService.moduloNumber$;
     this.videoFrames$ = this.libavInitService.videoFrames$;
     this.customHeight$ = this.libavInitService.customHeight$;
-    this.customWidht$ = this.libavInitService.customWidht$;
+    this.customWidth$ = this.libavInitService.customWidth$;
   }
-
- 
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.framesNumber$.subscribe(framesNumber => {
-        if (framesNumber !== null) {
-          this.moduloNumber$.subscribe(moduloNumber => {
-            if (moduloNumber !== null) {
-              this.videoFrames$.subscribe(videoFrames => {
-                if (videoFrames !== null) {
-                  this.customHeight$.subscribe(customHeight => {
-                    this.customWidht$.subscribe(customWidth => {
-                      console.log("Starting Draw frame...");
-                     
-                      this.buildStoryBoard(framesNumber, moduloNumber, videoFrames, customHeight, customWidth);
-                      console.timeEnd("Draw frame");
-                      
-                    });
+        if (framesNumber != null) {
+          this.videoFrames$.subscribe(videoFrames => {
+            if (videoFrames !== null) {
+              this.customHeight$.subscribe(customHeight => {
+                this.customWidth$.subscribe(customWidth => {
+                  this.moduloNumber$.subscribe(moduloNumber => {
+                    console.log("Starting Draw frame...");
+                    this.buildStoryBoard(framesNumber, videoFrames, customHeight, customWidth, moduloNumber);
+                    console.timeEnd("Draw frame");
                   });
-                } else {
-                  console.warn('Video frames are null, skipping buildStoryBoard');
-                }
+                });
               });
             } else {
-              console.warn('Modulo number is null, skipping buildStoryBoard');
+              console.warn('Video frames are null, skipping buildStoryBoard');
             }
           });
         } else {
@@ -69,10 +59,10 @@ export class StoryBoardComponent implements OnInit {
     }
   }
 
-  buildStoryBoard(framesNumber: number, moduloNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
+  buildStoryBoard(framesNumber: number, videoFrames: any, customHeight: number, customWidth: number, moduloNumber: number): void {
+    const totalFramesToDisplay = Math.floor(framesNumber / moduloNumber);
     console.time("Draw frame");
-    const frameToPrint = Math.floor(framesNumber / moduloNumber);
-    const numberOfRows = Math.ceil(frameToPrint / 5); // Calculate number of rows tto containe the img
+    const numberOfRows = Math.ceil(totalFramesToDisplay / 5); // Calculate number of rows to contain the images
 
     const storyboardContainer: HTMLElement = document.getElementById('storyContainer') as HTMLElement;
 
@@ -91,12 +81,12 @@ export class StoryBoardComponent implements OnInit {
 
       for (let j = 0; j < 5; j++) {
         const index = i * 5 + j;
-        if (index >= frameToPrint) break; // Stop if we've created all needed squares
+        if (index >= totalFramesToDisplay) break; // Stop if we've created all needed squares
 
         const col = document.createElement('div');
         col.classList.add('flex-fill'); // Bootstrap class for flexible width
 
-        const canvas = this.DrawFrame(videoFrames[index*moduloNumber], customWidth, customHeight, index, moduloNumber); // Generate the frame canvas with resizing and timecode
+        const canvas = this.DrawFrame(videoFrames[index], customWidth, customHeight, index, moduloNumber); // Generate the frame canvas with resizing and timecode
         if (canvas) {
           col.appendChild(canvas);
         }
@@ -105,6 +95,7 @@ export class StoryBoardComponent implements OnInit {
       }
       storyboardContainer.appendChild(row);
     }
+    console.timeEnd("Draw frame");
   }
 
   DrawFrame(displayFrame: any, customWidth: number, customHeight: number, frameIndex: number, moduloNumber: number): HTMLCanvasElement | null {
@@ -115,13 +106,10 @@ export class StoryBoardComponent implements OnInit {
         return null;
       }
 
-      
-
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!; // une img en 2d
       canvas.width = customWidth;
       canvas.height = customHeight;
-
 
       // magie magie
       const yPlane = displayFrame.data.subarray(displayFrame.layout[0].offset, displayFrame.layout[0].offset + displayFrame.layout[0].stride * displayFrame.height);
@@ -139,7 +127,7 @@ export class StoryBoardComponent implements OnInit {
           const U = uPlane[uIndex] - 128;
           const V = vPlane[vIndex] - 128;
 
-          const R = Y + 1.402 * V
+          const R = Y + 1.402 * V;
           const G = Y - 0.344 * U - 0.714 * V;
           const B = Y + 1.772 * U;
 
@@ -162,16 +150,15 @@ export class StoryBoardComponent implements OnInit {
       ctx.drawImage(tempCanvas, 0, 0, customWidth, customHeight);
 
       // Calculate and draw the timecode
-      const timeInSeconds = frameIndex*moduloNumber / this.frameRate;
+      const timeInSeconds = frameIndex * moduloNumber / this.frameRate;
       const minutes = Math.floor(timeInSeconds / 60);
       const seconds = Math.floor(timeInSeconds % 60);
       const milliseconds = Math.floor((timeInSeconds % 1) * 1000);
       const timecode = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
 
-
-      //font timecode
+      // font timecode
       ctx.font = '16px Arial';
-      ctx.fillStyle = 'white'; //color du txt
+      ctx.fillStyle = 'white'; // color du txt
       ctx.strokeStyle = 'black'; // rebors du txt
       ctx.lineWidth = 2;
       ctx.strokeText(timecode, 10, 30); 
