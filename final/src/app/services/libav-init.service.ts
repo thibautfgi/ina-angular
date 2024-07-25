@@ -10,7 +10,7 @@ declare var LibAV: any;
 
 export class LibavInitService {
 
-  private videoName = new BehaviorSubject<string>("sample640x360.webm"); //video a utiliser
+  private videoName = new BehaviorSubject<string>("test2.webm"); //video a utiliser
   private moduloNumber = new BehaviorSubject<number>(10); //le nbr de frame selectionner depend du modulo, ici 10 = 100frame = 10final
   private customHeight = new BehaviorSubject<number>(150); //tailler hauteur img
   private customWidht = new BehaviorSubject<number>(300); // taille largeur img
@@ -61,9 +61,21 @@ export class LibavInitService {
       const [fmt_ctx, streams] = await libav.ff_init_demuxer_file(videoName);
       console.timeEnd("Demuxe");
 
-      console.log("Streams: ", streams);
+      console.log("Streams: ", [streams]);
 
 
+      // stream audio et stream video = pprend le stream video
+      let videoIdx = -1;
+      for (let i = 0; i < streams.length; i++) {
+          if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
+              videoIdx = i;
+              break;
+          }
+      }
+      console.log(streams[videoIdx])
+      const videoStream = streams[videoIdx];
+
+      console.log(videoStream.duration)
 
      // Extract metadata using CLI commands to get fps
     
@@ -78,18 +90,29 @@ export class LibavInitService {
 
 
 
-
       console.log("Starting Decode...");
       console.time("Decode");
-      const [, codecContext, packet, frame] = await libav.ff_init_decoder(streams[0].codec_id, streams[0].codecpar);
+      const [, codecContext, packet, frame] = await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
       console.timeEnd("Decode");
 
       console.log("Starting lis et decode les frames...");
       console.time("Lis et decode les frames");
+
+      console.time("paslong")
       const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, packet);
-      const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[streams[0].index], true);
+      console.timeEnd("paslong")
+      
+      console.time("LONG")
+
+      const framesData = await libav.ff_decode_multi(codecContext, packet, frame, packets[videoStream.index], true);
+      
+      console.timeEnd("LONG")
+      
       console.timeEnd("Lis et decode les frames");
-      console.timeEnd("Temps Init");
+      console.timeEnd("Temps Init");  
+      
+
+
 
       console.log(`Extracted ${framesData.length} frames from the video!`);
       this.framesNumber.next(framesData.length);

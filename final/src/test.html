@@ -44,6 +44,8 @@
                 console.log(stream)
 
 
+                
+
                 // initilise le decoder pour lire la partie video demuxer
                 const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
 
