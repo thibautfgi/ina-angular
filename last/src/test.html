@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metadata Extraction Example</title>
+</head>
+<body>
+    <h1>Video Metadata</h1>
+    <input type="file" id="videoInput" accept="video/*">
+    <pre id="metadata"></pre>
+
+    <!-- Load the libav.js script -->
+    <script type="text/javascript" src="assets/libav/libav-5.4.6.1.1-webm-vp9.js"></script>
+    <script type="text/javascript">
+        document.getElementById('videoInput').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const arrayBuffer = e.target.result;
+
+                        const libav = await LibAV.LibAV({noworker: true});
+
+                        // Write the video file to libav's virtual file system
+                        console.log("Writing file to virtual filesystem...");
+                        await libav.writeFile("input_video.mp4", new Uint8Array(arrayBuffer));
+
+                        // Initialize demuxer
+                        console.log("Initializing demuxer...");
+                        const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("input_video.mp4");
+                        console.log("Demuxer initialized");
+
+                        // Extract format metadata
+                        const formatInfo = {
+                            filename: "input_video.mp4",
+                            duration: fmt_ctx ? fmt_ctx.duration / 1000000 : null, // Convert duration to seconds
+                            bit_rate: fmt_ctx ? fmt_ctx.bit_rate : null,
+                            nb_streams: fmt_ctx ? fmt_ctx.nb_streams : null
+                        };
+
+                        // Extract stream metadata
+                        const streamInfo = await Promise.all(streams.map(async (stream, index) => {
+                            const codec_name = await libav.avcodec_get_name(stream.codec_id);
+                            return {
+                                index,
+                                codec_type: stream.codec_type === 0 ? 'video' : 'audio', // Convert codec type to string
+                                codec_name,
+                                duration: stream.duration !== undefined ? stream.duration / 1000 : null, // Convert duration to seconds
+                                start_time: stream.start_time !== undefined ? stream.start_time / 1000 : null, // Convert start time to seconds
+                                bit_rate: stream.bit_rate !== undefined ? stream.bit_rate : null,
+                                width: stream.width !== undefined ? stream.width : null, // Video specific
+                                height: stream.height !== undefined ? stream.height : null, // Video specific
+                                sample_rate: stream.sample_rate !== undefined ? stream.sample_rate : null, // Audio specific
+                                channels: stream.channels !== undefined ? stream.channels : null // Audio specific
+                            };
+                        }));
+
+                        // Display metadata
+                        const metadata = {
+                            format: formatInfo,
+                            streams: streamInfo
+                        };
+                        document.getElementById('metadata').textContent = JSON.stringify(metadata, null, 2);
+                    };
+                    reader.onerror = (error) => {
+                        console.error("Error reading file:", error);
+                    };
+                    reader.readAsArrayBuffer(file);
+                } catch (error) {
+                    console.error("Error processing video:", error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
