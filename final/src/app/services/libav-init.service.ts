@@ -9,9 +9,9 @@ declare var LibAV: any;
 export class LibavInitService {
 
   private videoName = new BehaviorSubject<string>("test2.webm"); // video to use
+  private moduloNumber = new BehaviorSubject<number>(10); // number of frames to select based on modulo, here 10 = 100 frames = 10 final
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
-  private moduloNumber = new BehaviorSubject<number>(10);
 
   private videoFrames = new BehaviorSubject<any[]>([]);
   private framesNumber = new BehaviorSubject<number>(0);  // Initialize with 0
@@ -19,13 +19,13 @@ export class LibavInitService {
   private duration = new BehaviorSubject<number>(0); // Initialize with 0
 
   videoName$: Observable<string> = this.videoName.asObservable();
+  moduloNumber$: Observable<number> = this.moduloNumber.asObservable();
   videoFrames$: Observable<any[]> = this.videoFrames.asObservable();
   framesNumber$: Observable<number> = this.framesNumber.asObservable();
   customHeight$: Observable<number> = this.customHeight.asObservable();
   customWidth$: Observable<number> = this.customWidth.asObservable();
   duration$: Observable<number> = this.duration.asObservable();
   fps$: Observable<number> = this.fps.asObservable();
-  moduloNumber$: Observable<number> = this.moduloNumber.asObservable();
 
   constructor() { }
 
@@ -34,6 +34,7 @@ export class LibavInitService {
       console.time("Temps Init");
 
       const videoName = this.videoName.getValue();
+      const moduloNumber = this.moduloNumber.getValue();
       const customHeight = this.customHeight.getValue();
       const customWidth = this.customWidth.getValue();
 
@@ -65,73 +66,61 @@ export class LibavInitService {
           break;
         }
       }
-      if (videoIdx === -1) throw new Error('No video stream found');
-
       const videoStream = streams[videoIdx];
 
       console.log(videoStream.duration);
+
+      console.log("Starting reading frames...");
+      console.time("Reading frames");
+
+      // Read all packets
+      const [result, packets] = await libav.ff_read_frame_multi(fmt_ctx, await libav.av_packet_alloc());
+      console.timeEnd("Reading frames");
+      console.timeEnd("Temps Init");
+
+      if (result === libav.AVERROR_EOF) {
+        console.log("End of file reached");
+      }
+      const totalFrames = packets[videoStream.index].length;
+      this.framesNumber.next(totalFrames);
+
+      console.log(`Total number of frames in the video: ${totalFrames}`);
+      
+      // Select every 10th packet
+      const selectedPackets = packets[videoStream.index].filter((packet: any, index: number) => index % moduloNumber === 0);
+
+      console.log("Selected Packets", selectedPackets);
+      console.log(`Selected ${selectedPackets.length} packets based on modulo ${moduloNumber}`);
+
+      // Decode the selected packets
       console.log("Starting Decode...");
       console.time("Decode");
       const [, codecContext, packet, frame] = await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
+
+      // Decode each selected packet
+      const framesData = [];
+      for (const pkt of selectedPackets) {
+        try {
+          await libav.avcodec_send_packet(codecContext, pkt);
+          while (true) {
+            const result = await libav.avcodec_receive_frame(codecContext, frame);
+            if (result === libav.AVERROR_EOF || result === libav.AVERROR(libav.EAGAIN)) break;
+            if (result < 0) throw new Error(`Decoding error: ${result}`);
+            const decodedFrame = await libav.ff_copyout_frame(frame);
+            framesData.push(decodedFrame);
+          }
+        } catch (error) {
+          console.error(`Failed to decode packet at index ${selectedPackets.indexOf(pkt)}:`, error);
+        }
+      }
       console.timeEnd("Decode");
 
-      console.log("Starting lis et decode les frames...");
-      console.time("Lis et decode les frames");
-
-      // Reading and decoding frames
-      const framesData = [];
-      let result;
-      let packetData;
-      while (framesData.length < 10) {
-        result = await libav.av_read_frame(fmt_ctx, packet);
-        if (result === libav.AVERROR_EOF) break;
-        if (result < 0) continue;
-
-        if (packet.stream_index === videoIdx) {
-          result = await libav.avcodec_send_packet(codecContext, packet);
-          if (result < 0 && result !== libav.AVERROR_EOF && result !== libav.AVERROR(libav.EAGAIN)) {
-            console.error('Error sending packet:', libav.ff_error(result));
-            continue;
-          }
-
-          while (true) {
-            result = await libav.avcodec_receive_frame(codecContext, frame);
-            if (result === libav.AVERROR_EOF || result === libav.AVERROR(libav.EAGAIN)) break;
-            if (result < 0) {
-              console.error('Error receiving frame:', libav.ff_error(result));
-              break;
-            }
-
-            framesData.push(await libav.ff_copyout_frame(frame));
-            if (framesData.length >= 10) break;
-          }
-        }
-
-        await libav.av_packet_unref(packet);
-      }
-
-      // Flush the decoder
-      await libav.avcodec_send_packet(codecContext, null);
-      while (framesData.length < 10) {
-        result = await libav.avcodec_receive_frame(codecContext, frame);
-        if (result === libav.AVERROR_EOF || result === libav.AVERROR(libav.EAGAIN)) break;
-        if (result < 0) {
-          console.error('Error receiving frame during flush:', libav.ff_error(result));
-          break;
-        }
-
-        framesData.push(await libav.ff_copyout_frame(frame));
-      }
-
-      console.log(`Extracted ${framesData.length} frames from the video!`);
-
-      console.timeEnd("Lis et decode les frames");
-      console.timeEnd("Temps Total");
-
+      console.log(`Total number of decoded frames: ${framesData.length}`);
       this.videoFrames.next(framesData);
 
       console.log("------------------");
-      console.log("Frame Number = " + framesData.length);
+      console.log("Frame Number = " + totalFrames);
+      console.log("Modulo number = " + moduloNumber);
       console.log("Video name = " + videoName);
       console.log("customHeight = " + customHeight);
       console.log("customWidth = " + customWidth);

@@ -6,81 +6,75 @@
     <style>
         canvas {
             border: 1px solid black;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Video Frame Extraction</h1>
+    <h1>Extracted Frames</h1>
+    <div id="frames-container"></div>
 
-    <!-- Embedded video player for playback -->
-    <video width="640" height="360" controls>
-        <source src="assets/video/sample640X360.webm" type='video/webm; codecs="vp9"'>
-        Your browser does not support the video tag.
-    </video>
-
-    <!-- Canvas for displaying the extracted frame -->
-    <canvas id="videoCanvas"></canvas>
-
-    <!-- load ici le script libav -->
+    <!-- Load the libav.js script -->
     <script type="text/javascript" src="assets/libav/libav-5.4.6.1.1-webm-vp9.js"></script>
-
-
     <script type="text/javascript">
-
-
         document.addEventListener('DOMContentLoaded', async function() {
-            try {
+            const libav = await LibAV.LibAV();
 
-                // initialise libav
-                const libav = await LibAV.LibAV();
+            async function extractFrames(videoPath, frameCount) {
+                const videoData = await fetch(videoPath).then(response => response.arrayBuffer());
+                await libav.writeFile("test1.webm", new Uint8Array(videoData));
 
-                // fetch la video
-                const videoData = await fetch("assets/video/sample640X360.webm").then(response => response.arrayBuffer());
-                await libav.writeFile("sample640X360.webm", new Uint8Array(videoData));
+                const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("test1.webm");
+                const stream = streams[0];
 
-                // demuxer la video = separe en plusieur canal (video, audio...)
-                const [fmt_ctx, [stream]] = await libav.ff_init_demuxer_file("sample640X360.webm");
-
-                console.log(stream)
-
-
-                
-
-                // initilise le decoder pour lire la partie video demuxer
                 const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
 
+                const frames = [];
+                while (frames.length < frameCount) {
+                    const res = await libav.av_read_frame(fmt_ctx, packet);
+                    if (res === libav.AVERROR_EOF) break;
+                    if (res < 0) throw new Error("Error reading frame");
 
-                // lis les frames en packets puis les decodes en frames
-                const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, packet);
-                const frames = await libav.ff_decode_multi(codecContext, packet, frame, packets[stream.index], true);
-                console.log(`Extracted ${frames.length} frames from the video!`); //le nbr de frames extrait de la vid
+                    if (packet.stream_index === stream.index) {
+                        const sendRes = await libav.avcodec_send_packet(codecContext, packet);
+                        if (sendRes < 0) throw new Error("Error sending packet to decoder");
 
+                        while (true) {
+                            const receiveRes = await libav.avcodec_receive_frame(codecContext, frame);
+                            if (receiveRes === libav.AVERROR_EOF || receiveRes === libav.AVERROR(EAGAIN)) break;
+                            if (receiveRes < 0) throw new Error("Error receiving frame from decoder");
 
-                const firstFrame = frames[0];
+                            if (receiveRes === 0) {
+                                const copiedFrame = await libav.ff_copyout_frame(frame);
+                                frames.push(copiedFrame);
+                                if (frames.length >= frameCount) break;
+                            }
+                        }
+                    }
+                    await libav.av_packet_unref(packet);
+                }
 
-                // l'emplacement de notre frame
-                const canvas = document.getElementById('videoCanvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = firstFrame.width;
-                canvas.height = firstFrame.height;
+                await libav.avformat_close_input_js(fmt_ctx);
+                await libav.ff_free_decoder(codecContext, packet, frame);
 
+                return frames;
+            }
 
-                // le bazard pour cree une image
-                if (frames.length > 0 && frames[0].data) {
-                    console.log('First frame:', firstFrame);
+            async function displayFrames(frames) {
+                const container = document.getElementById('frames-container');
 
-                    // This is a Uint8Array containing all the raw data for the frame. 
-                    // This array includes data for all the planes (Y, U, and V) concatenated together.
-                    console.log('Frame layout:', firstFrame.layout);
+                frames.forEach(frame => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = frame.width;
+                    canvas.height = frame.height;
 
-                    // si je regarde dans firstframe.layout j'ai tt les donne que jutilise ensuite pour cree une image
-                    const yPlane = firstFrame.data.subarray(firstFrame.layout[0].offset, firstFrame.layout[0].offset + firstFrame.layout[0].stride * firstFrame.height);
-
-                    const imgData = ctx.createImageData(firstFrame.width, firstFrame.height);
-                    for (let y = 0; y < firstFrame.height; y++) {
-                        for (let x = 0; x < firstFrame.width; x++) {
-                            const yIndex = y * firstFrame.layout[0].stride + x;
-                            const imgIndex = y * firstFrame.width + x;
+                    const yPlane = frame.data.subarray(frame.layout[0].offset, frame.layout[0].offset + frame.layout[0].stride * frame.height);
+                    const imgData = ctx.createImageData(frame.width, frame.height);
+                    for (let y = 0; y < frame.height; y++) {
+                        for (let x = 0; x < frame.width; x++) {
+                            const yIndex = y * frame.layout[0].stride + x;
+                            const imgIndex = y * frame.width + x;
                             const value = yPlane[yIndex];
                             imgData.data[imgIndex * 4] = value;       // R
                             imgData.data[imgIndex * 4 + 1] = value;   // G
@@ -89,9 +83,13 @@
                         }
                     }
                     ctx.putImageData(imgData, 0, 0);
-                } else {
-                    console.error("No frames available to display or data is not accessible");
-                }
+                    container.appendChild(canvas);
+                });
+            }
+
+            try {
+                const frames = await extractFrames('assets/video/test1.webm', 10);
+                displayFrames(frames);
             } catch (error) {
                 console.error("Failed to load or process the video:", error);
             }
