@@ -20,7 +20,7 @@ export class StoryBoardComponent implements OnInit {
 
 
 
-  @Input() frameRate: number = 30; // frame rate by default, pb to get framerate on initlibav
+  @Input() frameRate: number = 23.98; // frame rate by default, pb to get framerate on initlibav
 
   constructor(
     private libavInitService: LibavInitService,
@@ -30,7 +30,7 @@ export class StoryBoardComponent implements OnInit {
     this.moduloNumber$ = this.libavInitService.moduloNumber$;
     this.videoFrames$ = this.libavInitService.videoFrames$;
     this.customHeight$ = this.libavInitService.customHeight$;
-    this.customWidht$ = this.libavInitService.customWidth$;
+    this.customWidht$ = this.libavInitService.customWidht$;
   }
 
  

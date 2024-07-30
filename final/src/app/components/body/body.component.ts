@@ -33,7 +33,8 @@ export class BodyComponent implements OnInit{
     if (isPlatformBrowser(this.platformId)) {
       const script = document.createElement('script');
       //script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
-      script.src = 'assets/libav-cli/libav-5.4.6.1.1-webm-vp9-cli.js';
+      //script.src = 'assets/libav-cli/libav-5.4.6.1.1-webm-vp9-cli.js';
+      script.src = 'assets/variant-webcodecs/dist/libav-5.4.6.1.1-webcodecs.js'
       //script.src = 'assets/libav-default/libav-5.4.6.1.1-webm-vp9-cli.wasm.js';
       script.onload = () => this.libavInitService.initLibAV();
       document.body.appendChild(script);

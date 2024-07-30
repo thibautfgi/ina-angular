@@ -66,9 +66,9 @@ export class LibavInitService {
           break;
         }
       }
-      const videoStream = streams[videoIdx];
+      if (videoIdx === -1) throw new Error("Video stream not found");
 
-      console.log(videoStream.duration);
+      const videoStream = streams[videoIdx];
 
       console.log("Starting reading frames...");
       console.time("Reading frames");
@@ -86,34 +86,51 @@ export class LibavInitService {
 
       console.log(`Total number of frames in the video: ${totalFrames}`);
       
-      // Select every 10th packet
-      const selectedPackets = packets[videoStream.index].filter((packet: any, index: number) => index % moduloNumber === 0);
+      // Select the first 10 frames
+      const selectedPackets1 = packets[videoStream.index].slice(0, 5);
+      const selectedPackets2 = packets[videoStream.index].slice(200, 205);
+      
+      // Concatenate the selected packets
+      const selectedPackets = selectedPackets1.concat(selectedPackets2);
 
       console.log("Selected Packets", selectedPackets);
-      console.log(`Selected ${selectedPackets.length} packets based on modulo ${moduloNumber}`);
+      console.log(`Selected ${selectedPackets.length} packets based on first 10 frames`);
 
-      // Decode the selected packets
-      console.log("Starting Decode...");
-      console.time("Decode");
-      const [, codecContext, packet, frame] = await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
+      // Initialize the WebCodecs VideoDecoder
+      console.log("Initializing WebCodecs VideoDecoder");
+      const videoDecoderConfig = {
+        codec: 'vp09.00.10.08', // VP9 codec string
+        codedWidth: videoStream.codecpar.width,
+        codedHeight: videoStream.codecpar.height,
+      };
+
+      const framesData: any[] = [];
+      const videoDecoder = new VideoDecoder({
+        output: frame => {
+          framesData.push(frame);
+          console.log(`Frame ${framesData.length}:`, frame);
+        },
+        error: e => console.error('Error decoding frame:', e)
+      });
+
+      videoDecoder.configure(videoDecoderConfig);
 
       // Decode each selected packet
-      const framesData = [];
       for (const pkt of selectedPackets) {
         try {
-          await libav.avcodec_send_packet(codecContext, pkt);
-          while (true) {
-            const result = await libav.avcodec_receive_frame(codecContext, frame);
-            if (result === libav.AVERROR_EOF || result === libav.AVERROR(libav.EAGAIN)) break;
-            if (result < 0) throw new Error(`Decoding error: ${result}`);
-            const decodedFrame = await libav.ff_copyout_frame(frame);
-            framesData.push(decodedFrame);
-          }
+          const chunk = new EncodedVideoChunk({
+            type: pkt.flags & 1 ? 'key' : 'delta',
+            timestamp: pkt.pts,
+            data: new Uint8Array(pkt.data)
+          });
+          videoDecoder.decode(chunk);
         } catch (error) {
           console.error(`Failed to decode packet at index ${selectedPackets.indexOf(pkt)}:`, error);
         }
       }
-      console.timeEnd("Decode");
+
+      // Flush the decoder
+      await videoDecoder.flush();
 
       console.log(`Total number of decoded frames: ${framesData.length}`);
       this.videoFrames.next(framesData);

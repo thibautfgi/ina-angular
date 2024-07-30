@@ -1,99 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Frame Extraction Example</title>
+    <meta charset="utf-8" />
+    <title>LibAVJS WebCodecs Frame Extraction Example</title>
     <style>
         canvas {
             border: 1px solid black;
-            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Extracted Frames</h1>
-    <div id="frames-container"></div>
+    <h1>LibAVJS WebCodecs Frame Extraction Example</h1>
 
-    <!-- Load the libav.js script -->
-    <script type="text/javascript" src="assets/libav/libav-5.4.6.1.1-webm-vp9.js"></script>
+    <div id="input-box">
+        <label for="file">Input file:&nbsp;</label>
+        <input type="file" id="file" accept="video/webm" />
+    </div>
+
+    <canvas id="videoCanvas"></canvas>
+
+    <!-- Ensure you have the correct paths to the libraries -->
+    <script type="text/javascript" src="assets/variant-webcodecs/dist/libav-5.4.6.1.1-webcodecs.js"></script>
+    <script type="text/javascript" src="assets/libavjs-webcodecs-bridge/dist/libavjs-webcodecs-bridge.js"></script>
+
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', async function() {
-            const libav = await LibAV.LibAV();
+        async function main() {
+            let libav = null;
+            let fmt_ctx = null;
+            let rpkt = null;
 
-            async function extractFrames(videoPath, frameCount) {
-                const videoData = await fetch(videoPath).then(response => response.arrayBuffer());
-                await libav.writeFile("test1.webm", new Uint8Array(videoData));
+            try {
+                // Get an input file
+                const fileBox = document.getElementById("file");
+                await new Promise(res => {
+                    fileBox.onchange = function() {
+                        if (fileBox.files.length)
+                            res();
+                    };
+                });
+                const file = fileBox.files[0];
+                document.getElementById("input-box").style.display = "none";
 
-                const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("test1.webm");
-                const stream = streams[0];
+                // Initialize libav.js
+                console.log("Initializing libav.js");
+                libav = await LibAV.LibAV({noworker: true});
 
-                const [, codecContext, packet, frame] = await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
+                // Load the file into libav.js
+                console.log("Loading file into libav.js");
+                await libav.mkreadaheadfile("input.webm", file);
 
-                const frames = [];
-                while (frames.length < frameCount) {
-                    const res = await libav.av_read_frame(fmt_ctx, packet);
-                    if (res === libav.AVERROR_EOF) break;
-                    if (res < 0) throw new Error("Error reading frame");
+                // Initialize demuxer
+                console.log("Initializing demuxer");
+                [fmt_ctx, streams] = await libav.ff_init_demuxer_file("input.webm");
 
-                    if (packet.stream_index === stream.index) {
-                        const sendRes = await libav.avcodec_send_packet(codecContext, packet);
-                        if (sendRes < 0) throw new Error("Error sending packet to decoder");
+                // Find the video stream
+                let videoStreamIndex = -1;
+                for (let i = 0; i < streams.length; i++) {
+                    if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
+                        videoStreamIndex = i;
+                        break;
+                    }
+                }
+                if (videoStreamIndex === -1) throw new Error("No video stream found!");
 
-                        while (true) {
-                            const receiveRes = await libav.avcodec_receive_frame(codecContext, frame);
-                            if (receiveRes === libav.AVERROR_EOF || receiveRes === libav.AVERROR(EAGAIN)) break;
-                            if (receiveRes < 0) throw new Error("Error receiving frame from decoder");
+                const videoStream = streams[videoStreamIndex];
+                const videoConfig = await LibAVWebCodecsBridge.videoStreamToConfig(libav, videoStream);
 
-                            if (receiveRes === 0) {
-                                const copiedFrame = await libav.ff_copyout_frame(frame);
-                                frames.push(copiedFrame);
-                                if (frames.length >= frameCount) break;
+                // Check if the config is supported
+                const supported = await VideoDecoder.isConfigSupported(videoConfig);
+                if (!supported.supported) throw new Error("Video config not supported!");
+
+                // Initialize the video decoder
+                console.log("Initializing video decoder");
+                const decoder = new VideoDecoder({
+                    output: frame => {
+                        console.log("Frame decoded:", frame);
+                        displayFrame(frame);
+                    },
+                    error: e => console.error('Error decoding frame:', e)
+                });
+                decoder.configure(videoConfig);
+
+                // Demux and decode the first frame
+                console.log("Demuxing and decoding the first frame");
+                let firstFrameExtracted = false;
+                rpkt = await libav.av_packet_alloc();
+                while (!firstFrameExtracted) {
+                    const [res, packets] = await libav.ff_read_multi(fmt_ctx, rpkt, null, { limit: 1 });
+                    if (res === libav.AVERROR_EAGAIN || res === -libav.EAGAIN) {
+                        continue;  // Try reading the packet again
+                    } else if (res < 0 && res !== libav.AVERROR_EOF) {
+                        console.error("Error reading packet:", res);
+                        throw new Error("Error reading packet");
+                    }
+
+                    if (packets[videoStreamIndex]) {
+                        for (const packet of packets[videoStreamIndex]) {
+                            const chunk = LibAVWebCodecsBridge.packetToEncodedVideoChunk(packet, videoStream);
+                            while (decoder.decodeQueueSize) {
+                                await new Promise(res => {
+                                    decoder.addEventListener("dequeue", res, { once: true });
+                                });
+                            }
+                            decoder.decode(chunk);
+
+                            // Extract and display the first frame
+                            if (!firstFrameExtracted) {
+                                console.log("First frame extracted");
+                                firstFrameExtracted = true;
+                                break;
                             }
                         }
                     }
-                    await libav.av_packet_unref(packet);
+
+                    if (res === libav.AVERROR_EOF) break;
                 }
-
-                await libav.avformat_close_input_js(fmt_ctx);
-                await libav.ff_free_decoder(codecContext, packet, frame);
-
-                return frames;
-            }
-
-            async function displayFrames(frames) {
-                const container = document.getElementById('frames-container');
-
-                frames.forEach(frame => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = frame.width;
-                    canvas.height = frame.height;
-
-                    const yPlane = frame.data.subarray(frame.layout[0].offset, frame.layout[0].offset + frame.layout[0].stride * frame.height);
-                    const imgData = ctx.createImageData(frame.width, frame.height);
-                    for (let y = 0; y < frame.height; y++) {
-                        for (let x = 0; x < frame.width; x++) {
-                            const yIndex = y * frame.layout[0].stride + x;
-                            const imgIndex = y * frame.width + x;
-                            const value = yPlane[yIndex];
-                            imgData.data[imgIndex * 4] = value;       // R
-                            imgData.data[imgIndex * 4 + 1] = value;   // G
-                            imgData.data[imgIndex * 4 + 2] = value;   // B
-                            imgData.data[imgIndex * 4 + 3] = 255;     // A
-                        }
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                    container.appendChild(canvas);
-                });
-            }
-
-            try {
-                const frames = await extractFrames('assets/video/test1.webm', 10);
-                displayFrames(frames);
             } catch (error) {
-                console.error("Failed to load or process the video:", error);
+                console.error("An error occurred:", error);
+            } finally {
+                try {
+                    if (rpkt) {
+                        console.log("Freeing packet");
+                        await libav.av_packet_free(rpkt);
+                    }
+                    
+                } catch (cleanupError) {
+                    console.error("Error during cleanup:", cleanupError);
+                }
             }
-        });
+        }
+
+        function displayFrame(frame) {
+            console.log("Displaying frame:", frame);
+            const canvas = document.getElementById('videoCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = frame.displayWidth;
+            canvas.height = frame.displayHeight;
+
+            createImageBitmap(frame).then(imageBitmap => {
+                ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+                frame.close();
+            }).catch(error => {
+                console.error('Error creating image bitmap:', error);
+            });
+        }
+
+        main();
     </script>
 </body>
 </html>
