@@ -19,6 +19,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+/src/assets/video/test3.mp4
 
 # Visual Studio Code
 .vscode/*

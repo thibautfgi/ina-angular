@@ -12,12 +12,10 @@ import { HeaderComponent } from '../header/header.component';
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
-export class BodyComponent implements OnInit{
+export class BodyComponent implements OnInit {
 
   videoName$: Observable<string>;
   moduloNumber$: Observable<number>;
-
-
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
@@ -27,22 +25,25 @@ export class BodyComponent implements OnInit{
     this.moduloNumber$ = this.libavInitService.moduloNumber$;
   }
 
-
-  async ngOnInit() { // au demarrage
-    // load ce script sur le browser uniquement
+  async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      const script = document.createElement('script');
-      //script.src = 'assets/libav/libav-5.4.6.1.1-webm-vp9.js';
-      //script.src = 'assets/libav-cli/libav-5.4.6.1.1-webm-vp9-cli.js';
-      script.src = 'assets/variant-webcodecs/dist/libav-5.4.6.1.1-webcodecs.js'
-      //script.src = 'assets/libav-default/libav-5.4.6.1.1-webm-vp9-cli.wasm.js';
-      script.onload = () => this.libavInitService.initLibAV();
-      document.body.appendChild(script);
+      // Load LibAV script
+      await this.loadScript('assets/variant-webcodecs/dist/libav-5.4.6.1.1-webcodecs.js');
+      // Load LibAVWebCodecsBridge script
+      await this.loadScript('assets/libavjs-webcodecs-bridge/dist/libavjs-webcodecs-bridge.js');
+      
+      // Initialize LibAV
+      this.libavInitService.initLibAV();
     }
-  }  
+  }
 
-
-
-
-
+  private loadScript(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+      document.body.appendChild(script);
+    });
+  }
 }
