@@ -18,7 +18,7 @@ export class StoryBoardComponent implements OnInit {
   @Input() customHeight$: Observable<number>;
   @Input() customWidth$: Observable<number>;
 
-  @Input() frameRate: number = 30; // frame rate by default, pb to get framerate on initlibav
+  @Input() frameRate: number = 30; // frame rate by default
 
   constructor(
     private libavInitService: LibavInitService,
@@ -65,33 +65,31 @@ export class StoryBoardComponent implements OnInit {
 
   buildStoryBoard(framesNumber: number, moduloNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
     console.time("Draw frame");
-    const frameToPrint = videoFrames.length; // Print all frames we have
-    const numberOfRows = Math.ceil(frameToPrint / 5); // Calculate number of rows to contain the img
+    const frameToPrint = videoFrames.length;
+    const numberOfRows = Math.ceil(frameToPrint / 5);
 
     const storyboardContainer: HTMLElement = document.getElementById('storyContainer') as HTMLElement;
 
-    // Check if storyboardContainer exists
     if (!storyboardContainer) {
       console.error('Storyboard container not found');
       return;
     }
 
-    // Clear existing content
     storyboardContainer.innerHTML = '';
 
     for (let i = 0; i < numberOfRows; i++) {
       const row = document.createElement('div');
-      row.classList.add('d-flex', 'flex-row', 'mb-3'); // Bootstrap classes for row layout
+      row.classList.add('d-flex', 'flex-row', 'mb-3');
 
       for (let j = 0; j < 5; j++) {
         const index = i * 5 + j;
-        if (index >= frameToPrint) break; // Stop if we've created all needed squares
+        if (index >= frameToPrint) break;
 
         const col = document.createElement('div');
-        col.classList.add('flex-fill'); // Bootstrap class for flexible width
+        col.classList.add('flex-fill');
 
-        console.log(`Drawing frame ${index}...`); // Log the frame index
-        const canvas = this.DrawFrame(videoFrames[index], customWidth, customHeight, index, moduloNumber); // Generate the frame canvas with resizing and timecode
+        console.log(`Drawing frame ${index}...`);
+        const canvas = this.DrawFrame(videoFrames[index], customWidth, customHeight, index, moduloNumber);
         if (canvas) {
           col.appendChild(canvas);
         }
@@ -115,18 +113,15 @@ export class StoryBoardComponent implements OnInit {
       canvas.width = customWidth;
       canvas.height = customHeight;
 
-      // Use createImageBitmap to draw the VideoFrame onto the canvas
       createImageBitmap(videoFrame).then(imageBitmap => {
         ctx.drawImage(imageBitmap, 0, 0, customWidth, customHeight);
 
-        // Calculate and draw the timecode
         const timeInSeconds = frameIndex * moduloNumber / this.frameRate;
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = Math.floor(timeInSeconds % 60);
         const milliseconds = Math.floor((timeInSeconds % 1) * 1000);
         const timecode = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
 
-        // Draw the timecode
         ctx.font = '16px Arial';
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
