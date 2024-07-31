@@ -8,7 +8,7 @@ declare var LibAV: any;
 })
 export class LibavInitService {
 
-  private videoName = new BehaviorSubject<string>("test1.webm"); // video to use
+  private videoName = new BehaviorSubject<string>("test6.webm"); // video to use
   private moduloNumber = new BehaviorSubject<number>(10); // Process every frame
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
@@ -87,33 +87,24 @@ export class LibavInitService {
       console.log("KEYFRAMES ", keyFrames);
   
       console.log(`Total number of frames in the video: ${totalFrames}`);
-
-
-    // Extract codec information
-    const codec = await libav.avcodec_get_name(videoStream.codec_id);
-    console.log(`Codec: ${codec}`);
-    this.codec.next(codec); // Update the codec BehaviorSubject
-
-    let trueCodec;
-
-      if (codec == 'vp9') { // yesyes its no sence
-        trueCodec = 'vp09.00.10.08' 
-      }
-      if (codec == 'vp8') {
-        trueCodec = 'vp8' 
-      } 
-    
-
-    const videoDecoderConfig = {
-      codec: trueCodec, // Use the codec obtained from the video stream
-      codedWidth: videoStream.codecpar.width,
-      codedHeight: videoStream.codecpar.height,
-    };
-
+  
+      // Extract codec information
+      const codec = await libav.avcodec_get_name(videoStream.codec_id);
+      console.log(`Codec: ${codec}`);
+      this.codec.next(codec); // Update the codec BehaviorSubject
+  
+      const trueCodec = this.getCodecString(codec);
+      console.log(`Codec String: ${trueCodec}`);
+  
+      const videoDecoderConfig = {
+        codec: trueCodec, // Use the codec obtained from the video stream
+        codedWidth: videoStream.codecpar.width,
+        codedHeight: videoStream.codecpar.height,
+      };
   
       for (const keyFrame of keyFrames) {
         const keyFrameIndex = packets[videoStream.index].indexOf(keyFrame);
-        await this.processBatch(packets[videoStream.index], videoDecoderConfig, keyFrameIndex);
+        await this.processBatch([keyFrame], videoDecoderConfig); // Process each keyframe individually
       }
   
       console.log("------------------");
@@ -133,8 +124,7 @@ export class LibavInitService {
     }
   }
   
-
-  async processBatch(packets: any[], videoDecoderConfig: any, keyFrameIndex: number) {
+  async processBatch(packets: any[], videoDecoderConfig: any) {
     console.log("PHASE1: Configuring video decoder");
     const framesData: any[] = [];
     const videoDecoder = new VideoDecoder({
@@ -151,29 +141,20 @@ export class LibavInitService {
     console.log("PHASE2: Decoding packets");
     console.log(`Total packets to decode: ${packets.length}`);
   
-    // Ensure we get 10 frames starting from the keyframe
-    const packetsToDecode = packets.slice(keyFrameIndex, keyFrameIndex + 10);
-  
-    // Ensure that the first packet is a keyframe
-    if (!(packetsToDecode[0].flags & 1)) {
-      console.error('First packet is not a keyframe, skipping batch');
-      return;
-    }
-  
-    for (const [index, pkt] of packetsToDecode.entries()) {
+    for (const [index, pkt] of packets.entries()) {
       const chunk = new EncodedVideoChunk({
         type: pkt.flags & 1 ? 'key' : 'delta',
         timestamp: pkt.pts,
         data: new Uint8Array(pkt.data)
       });
   
-      console.log(`Decoding packet at index ${keyFrameIndex + index}, type: ${chunk.type}, timestamp: ${chunk.timestamp}`);
+      console.log(`Decoding packet at index ${index}, type: ${chunk.type}, timestamp: ${chunk.timestamp}`);
       this.fps.next(chunk.timestamp);
   
       try {
         await videoDecoder.decode(chunk);
       } catch (error) {
-        console.error(`Failed to decode packet at index ${keyFrameIndex + index}:`, error);
+        console.error(`Failed to decode packet at index ${index}:`, error);
         // Stop processing this batch if the keyframe is missing
         if (chunk.type === 'key') break;
       }
@@ -185,4 +166,18 @@ export class LibavInitService {
     this.videoFrames.next([...this.videoFrames.getValue(), ...framesData]);
   }
   
+  private getCodecString(codecName: string): string {
+    switch (codecName) {
+      case 'h264':
+        return 'avc1.42001E'; // Example for H.264 High Profile
+      case 'vp8':
+        return 'vp8';
+      case 'vp9':
+        return 'vp09.00.10.08';
+      case 'hevc':
+        return 'hev1';
+      default:
+        throw new Error(`Unsupported codec: ${codecName}`);
+    }
+  }
 }
