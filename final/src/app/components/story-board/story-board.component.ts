@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { LibavInitService } from '../../services/libav-init.service';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { AsyncPipe, isPlatformBrowser } from '@angular/common';
 
 @Component({
@@ -16,9 +16,11 @@ export class StoryBoardComponent implements OnInit {
   @Input() videoFrames$!: Observable<any>;
   @Input() customHeight$: Observable<number>;
   @Input() customWidth$: Observable<number>;
-  @Input() fps$: Observable<number>; 
+  @Input() fps$: Observable<number>;
+  @Input() keyframeIndices$: Observable<number[]>;
 
-  private fps: number;
+  private fps: number = 25; // default value, will be updated from fps$
+  private previousFrameCount: number = 0; // Track the number of previously drawn frames
 
   constructor(
     private libavInitService: LibavInitService,
@@ -29,31 +31,23 @@ export class StoryBoardComponent implements OnInit {
     this.customHeight$ = this.libavInitService.customHeight$;
     this.customWidth$ = this.libavInitService.customWidth$;
     this.fps$ = this.libavInitService.fps$;
-    this.fps = 0;
+    this.keyframeIndices$ = this.libavInitService.keyframeIndices$;
   }
 
+  // init en meme temps tt les donnes suscribe
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.fps$.subscribe(fps => {
+      combineLatest([
+        this.fps$,
+        this.framesNumber$,
+        this.videoFrames$,
+        this.customHeight$,
+        this.customWidth$,
+        this.keyframeIndices$
+      ]).subscribe(([fps, framesNumber, videoFrames, customHeight, customWidth, keyframeIndices]) => {
         this.fps = fps;
-      });
-      this.framesNumber$.subscribe(framesNumber => {
-        if (framesNumber !== null) {
-          this.videoFrames$.subscribe(videoFrames => {
-            if (videoFrames !== null) {
-              this.customHeight$.subscribe(customHeight => {
-                this.customWidth$.subscribe(customWidth => {
-                  console.log("Starting Draw frame...");
-                  this.buildStoryBoard(framesNumber, videoFrames, customHeight, customWidth);
-                  console.timeEnd("Draw frame");
-                });
-              });
-            } else {
-              console.warn('Video frames are null, skipping buildStoryBoard');
-            }
-          });
-        } else {
-          console.warn('Frames number is null, skipping buildStoryBoard');
+        if (framesNumber !== null && videoFrames !== null && videoFrames.length > 0) { 
+          this.buildStoryBoard(videoFrames, customHeight, customWidth, fps, keyframeIndices);
         }
       });
     } else {
@@ -61,79 +55,60 @@ export class StoryBoardComponent implements OnInit {
     }
   }
 
-  buildStoryBoard(framesNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
-    console.time("Draw frame");
-    const frameToPrint = videoFrames.length;
-    const numberOfRows = Math.ceil(frameToPrint / 5);
-
+  // build le story board
+  buildStoryBoard(videoFrames: any[], customHeight: number, customWidth: number, fps: number, keyframeIndices: number[]): void {
     const storyboardContainer: HTMLElement = document.getElementById('storyContainer') as HTMLElement;
-
     if (!storyboardContainer) {
       console.error('Storyboard container not found');
       return;
     }
 
-    storyboardContainer.innerHTML = '';
+    const frameToPrint = videoFrames.length;
 
-    for (let i = 0; i < numberOfRows; i++) {
-      const row = document.createElement('div');
-      row.classList.add('d-flex', 'flex-row', 'mb-3');
-
-      for (let j = 0; j < 5; j++) {
-        const index = i * 5 + j;
-        if (index >= frameToPrint) break;
-
-        const col = document.createElement('div');
-        col.classList.add('flex-fill');
-
-        console.log(`Drawing frame ${index}...`);
-        const canvas = this.drawFrame(videoFrames[index], customWidth, customHeight, index);
-        if (canvas) {
-          col.appendChild(canvas);
-        }
-
-        row.appendChild(col);
+    // 5 img par ligne
+    for (let index = this.previousFrameCount; index < frameToPrint; index++) {
+      if (index % 5 === 0) {
+        const row = document.createElement('div');
+        row.classList.add('d-flex', 'flex-row', 'mb-3');
+        storyboardContainer.appendChild(row);
       }
-      storyboardContainer.appendChild(row);
+
+      const rows = storyboardContainer.getElementsByClassName('d-flex flex-row mb-3');
+      const row = rows[rows.length - 1];
+
+      const col = document.createElement('div');
+      col.classList.add('flex-fill');
+
+      const canvas = this.drawFrame(videoFrames[index].frame, customWidth, customHeight, keyframeIndices[index], fps);
+      if (canvas) {
+        col.appendChild(canvas);
+      }
+
+      row.appendChild(col);
     }
+
+    this.previousFrameCount = frameToPrint;
   }
 
-  drawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, frameIndex: number): HTMLCanvasElement | null {
-    if (isPlatformBrowser(this.platformId)) {
 
-      if (!videoFrame) {
-        console.error('Display frame not found');
-        return null;
-      }
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-      canvas.width = customWidth;
-      canvas.height = customHeight;
-
-      createImageBitmap(videoFrame).then(imageBitmap => {
-        ctx.drawImage(imageBitmap, 0, 0, customWidth, customHeight);
-
-        const timeInSeconds = frameIndex / this.fps;
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = Math.floor(timeInSeconds % 60);
-        const milliseconds = Math.floor((timeInSeconds % 1) * 1000);
-        const timecode = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
-
-        ctx.font = '16px Arial';
-        ctx.fillStyle = 'white';
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.strokeText(timecode, 10, 30);
-        ctx.fillText(timecode, 10, 30);
-      }).catch(error => {
-        console.error('Error creating image bitmap:', error);
-      });
-
-      return canvas;
-    } else {
-      console.warn('drawFrame called in non-browser environment');
+  // dessine la frame
+  drawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, frameIndex: number, fps: number): HTMLCanvasElement | null {
+    if (!videoFrame) {
+      console.error('Display frame not found');
       return null;
     }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = customWidth;
+    canvas.height = customHeight;
+
+    createImageBitmap(videoFrame).then(imageBitmap => {
+      ctx.drawImage(imageBitmap, 0, 0, customWidth, customHeight);
+    }).catch(error => {
+      console.error('Error creating image bitmap:', error);
+    });
+
+    return canvas;
   }
 }

@@ -10,23 +10,20 @@ declare var LibAVWebCodecsBridge: any;
 })
 export class LibavInitService {
 
-
-
-  // Setup there initial data
-  private videoName = new BehaviorSubject<string>("test1.mp4"); // video to test
+  // Setup initial data
+  private videoName = new BehaviorSubject<string>("test2.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
-  private maxKeyFrames = new BehaviorSubject<number>(40); // image width size
+  private maxKeyFrames = new BehaviorSubject<number>(40); // max keyframes
 
-  //  Init empty data
+  // Init empty data
   private videoFrames = new BehaviorSubject<any[]>([]);
-  private framesNumber = new BehaviorSubject<number>(0); 
-  private fps = new BehaviorSubject<number>(0); 
-  private duration = new BehaviorSubject<number>(0); 
-  private codec = new BehaviorSubject<string>(""); 
+  private framesNumber = new BehaviorSubject<number>(0);
+  private fps = new BehaviorSubject<number>(0);
+  private duration = new BehaviorSubject<number>(0);
+  private codec = new BehaviorSubject<string>("");
   private loopNumber = new BehaviorSubject<number>(0);
-
-
+  private keyframeIndices = new BehaviorSubject<number[]>([]); // Add this line
 
   // Observable
   videoName$: Observable<string> = this.videoName.asObservable();
@@ -39,19 +36,16 @@ export class LibavInitService {
   codec$: Observable<string> = this.codec.asObservable();
   maxKeyFrames$: Observable<number> = this.maxKeyFrames.asObservable();
   loopNumber$: Observable<number> = this.loopNumber.asObservable();
+  keyframeIndices$: Observable<number[]> = this.keyframeIndices.asObservable(); // Add this line
 
   constructor() { }
 
-
-
-
   async initLibAV() {
     try {
-
-      console.log("Starting Init...") 
+      console.log("Starting Init...");
       console.time("Temps Init"); // All the process
 
-      // catch value to be usable in this func
+      // Catch value to be usable in this func
       const videoName = this.videoName.getValue();
       const customHeight = this.customHeight.getValue();
       const customWidth = this.customWidth.getValue();
@@ -62,7 +56,7 @@ export class LibavInitService {
       console.log("Starting Fetch...");
       console.time(" => Temps de Fetch");
 
-      //fetching = chercher
+      // fetching = chercher
       const videoData = await fetch(`assets/video/${videoName}`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not ok');
@@ -70,23 +64,22 @@ export class LibavInitService {
           return response.arrayBuffer();
         });
 
-      // write data in the video
-
+      // Write data in the video
       console.log("Starting WriteFile...");
       console.time(" => Temps de WriteFile");
       await libav.writeFile(videoName, new Uint8Array(videoData));
       console.timeEnd(" => Temps de WriteFile");
 
-      // etrait flux audio et video, get list of codec/types
+      // Extract flux audio et video, get list of codec/types
       console.log("Starting Demux...");
       console.time(" => Demux");
       const [fmt_ctx, streams] = await libav.ff_init_demuxer_file(videoName);
       console.timeEnd(" => Demux");
 
-      // les streams visualiser = canaux audio et video
+      // Streams visualiser = canaux audio et video
       console.log(" =====> Streams lists : ", streams);
 
-      // catch the video stream, video > 0 usualy
+      // Catch the video stream, video > 0 usually
       let videoIdx = -1;
       for (let i = 0; i < streams.length; i++) {
         if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
@@ -96,33 +89,31 @@ export class LibavInitService {
       }
       if (videoIdx === -1) throw new Error("Video stream not found");
 
-      // le canal video
+      // Canal video
       const videoStream = streams[videoIdx];
 
       console.log("Starting reading frames...");
       console.time(" => Reading frames");
 
-      // read many packet at once return packets ready to use and err/succes msg
+      // Read many packet at once return packets ready to use and err/success msg
       const [result, packets] = await libav.ff_read_frame_multi(fmt_ctx, await libav.av_packet_alloc());
 
-      if (result === libav.AVERROR_EOF) { //detecte si on a bien lus tt la video
+      if (result === libav.AVERROR_EOF) { // Detect if we have read the entire video
         console.log("End of file reached");
       }
       console.timeEnd(" => Reading frames");
-    
 
-      //compte les frames
+      // Count frames
       const totalFrames = packets[videoStream.index].length;
       this.framesNumber.next(totalFrames);
 
-      // le nbr de keyframes a afficher, peut importe la taille du fichier, elle
-      // seront selectionner a interval regulier plus ou moins grd en fonction de la
-      // taille du fichier, si - de 40 keyframes, tt afficher directement
-      // si +de 40, trie avec le modulo des keyframes
+      // Nbr de keyframes to display, regardless of file size, they
+      // will be selected at regular intervals more or less large depending on the
+      // file size, if < 40 keyframes, display all directly
+      // if > 40, sort with the modulo of the keyframes
       const keyFrames = packets[videoStream.index].filter((pkt: any) => pkt.flags & 1);
       const modulo = Math.ceil(keyFrames.length / maxKeyFrames);
       const selectedKeyframes = keyFrames.filter((_: any, index: number) => index % modulo === 0).slice(0, maxKeyFrames);
-
 
       console.log("-----------------------------------------------------");
       console.log("Total number of KEYFRAMES in the video: ", keyFrames.length);
@@ -130,73 +121,65 @@ export class LibavInitService {
       console.log("Total number of SELECTED KEYFRAMES in the video: ", selectedKeyframes.length);
       console.log("-----------------------------------------------------");
 
-
-
-      console.log("Starting config...")
+      console.log("Starting config...");
       console.time(" => Config");
-      // Extract codec information, pour decode la video
+      // Extract codec information to decode the video
       const codec = await libav.avcodec_get_name(videoStream.codec_id);
-      this.codec.next(codec); 
+      this.codec.next(codec);
 
-      //lance getCodecString func pour recuperer une string utilisable du codec
+      // Launch getCodecString func to retrieve a usable string from the codec
       const trueCodec = this.getCodecString(codec);
 
       console.log(` =====> Codec: ${codec}, Codec String: ${trueCodec}`);
 
-       // dans le cas mp4, catch les extradata pour setup config
-      if (codec == "h264" || codec == "h265") { // ajoute des codecs ici si la tech mp4 evolue
+      // In the case of mp4, catch extradata to set up config
+      if (codec == "h264" || codec == "h265") { // Add codecs here if mp4 tech evolves
         const extradata = await this.extractExtradataUsingWebCodecs(libav, videoStream); // TODO: test h265
         if (!extradata) {
           throw new Error('Extradata not found');
         }
         videoDecoderConfig = {
           codec: trueCodec,
-          codedWidth: videoStream.codecpar.width,
-          codedHeight: videoStream.codecpar.height,
+          codedWidth: customWidth,
+          codedHeight: customHeight,
           description: extradata
         };
-        // if mp4 take good stream information
 
+        // If mp4 take good stream information
         // Calculate fps
         const truefps = totalFrames / videoStream.duration;
-      
-        this.fps.next(truefps)
-        console.log(this.fps.getValue())
+        this.fps.next(truefps);
 
-
-
-      } else { // cas webm pas besoin d'extradata pour setup config
+      } else { // For webm no need for extradata to set up config
         videoDecoderConfig = {
           codec: trueCodec, // Use the codec obtained from the video stream
           codedWidth: videoStream.codecpar.width,
           codedHeight: videoStream.codecpar.height,
         };
 
-
-        // if webm stream information are overall bad
-
+        // If webm stream information is overall bad
+        const truefps = 30;
+        this.fps.next(truefps);
       }
 
       console.timeEnd(" => Config");
 
-      console.log(" =====> Selected Keyframes List : ", selectedKeyframes)
+      console.log(" =====> Selected Keyframes List : ", selectedKeyframes);
 
-      console.log("Starting Process Frames...")
-      console.time(" => Process Frames & Draw")
+      console.log("Starting Process Frames...");
+      console.time(" => Process Frames & Draw");
 
       // Process each keyframe individually
-      for (const keyFrame of selectedKeyframes) {
-        await this.processKeyFrames([keyFrame], videoDecoderConfig);
+      for (const [index, keyFrame] of selectedKeyframes.entries()) {
+        await this.processKeyFrames([keyFrame], videoDecoderConfig, index);
       }
 
-      console.log(" =====> Nombre total de keyframes Process et decode : ", this.loopNumber.getValue())
-      console.timeEnd(" => Process Frames & Draw")
-
-
-
+      console.log(" =====> Nombre total de keyframes Process et decode : ", this.loopNumber.getValue());
+      console.timeEnd(" => Process Frames & Draw");
 
       console.log("------------------");
       console.timeEnd("Temps Init");
+      console.log("Fps = ", +this.fps.getValue());
       console.log("Frame Number = " + totalFrames);
       console.log("Video name = " + videoName);
       console.log("customHeight = " + customHeight);
@@ -213,26 +196,21 @@ export class LibavInitService {
     }
   }
 
-
-
   // permet de process et decode les keyframes selected, une par une.
-  async processKeyFrames(packets: any[], videoDecoderConfig: any) {
-
-  //
+  async processKeyFrames(packets: any[], videoDecoderConfig: any, frameIndex: number) { // Add frameIndex parameter
     const framesData: any[] = [];
-    // si une frame a ete decode avec succes, elle est output
+    const keyframeIndices = this.keyframeIndices.getValue(); // Get current keyframe indices
+
     const videoDecoder = new VideoDecoder({
       output: frame => {
-        framesData.push(frame);
+        framesData.push({ frame, frameIndex }); // Store the frame and its index
         console.log(`Frame received, ready to be decode :`, frame);
       },
       error: e => console.error('Error decoding frame:', e)
     });
 
-    // config le decoder avec code, taille, extradata...
     videoDecoder.configure(videoDecoderConfig);
 
-    // cree un encoded video chunck(troncons) avec tt les infos necessaire a chaque frames
     for (const [index, pkt] of packets.entries()) {
       const chunk = new EncodedVideoChunk({
         type: pkt.flags & 1 ? 'key' : 'delta',
@@ -240,34 +218,32 @@ export class LibavInitService {
         data: new Uint8Array(pkt.data)
       });
 
+      if (chunk.type === 'key') {
+        keyframeIndices.push(frameIndex); // Store the frame index of the keyframe
+      }
+
       try {
-        await videoDecoder.decode(chunk); // decode le chunk
+        await videoDecoder.decode(chunk);
       } catch (error) {
         console.error(`Failed to decode packet at index ${index}:`, error);
-        // Stop processing this batch if the keyframe is missing
         if (chunk.type === 'key') break;
       }
     }
 
-    // envoie les data en process
-    await videoDecoder.flush(); // verifie que tt les frames envoye ds le decode son bien process
+    await videoDecoder.flush();
     this.videoFrames.next([...this.videoFrames.getValue(), ...framesData]);
+    this.keyframeIndices.next(keyframeIndices); // Update keyframe indices
 
-
-    // tiens en compte le nbr de frames process
     const updatedLoopNumber = this.loopNumber.getValue() + 1;
     this.loopNumber.next(updatedLoopNumber);
     console.log(' =====> Nbr de KeyFrames Process et Decode:', updatedLoopNumber);
-
   }
-
 
   // permet de recupere une codec string utilisable par libav en fct du codec donne
   private getCodecString(codecName: string): string {
     switch (codecName) {
       case 'h264':
-        return 'avc1.42001E'; // le plus communs pour mp4/h264, des cas particuliers existe 
-        //TODO: gerer les cas particulier de variante moins connue de h264
+        return 'avc1.42001E'; // le plus commun pour mp4/h264, des cas particuliers existent
       case 'vp8':
         return 'vp8';
       case 'vp9':
@@ -278,7 +254,6 @@ export class LibavInitService {
         throw new Error(`Unsupported codec: ${codecName}`);
     }
   }
-
 
   // recupère les extradata mp4 avec wecodec bridge libav
   private async extractExtradataUsingWebCodecs(libav: any, videoStream: any): Promise<Uint8Array | null> {
