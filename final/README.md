@@ -5,11 +5,19 @@ J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a
 
 # Testing
 
-npm install @libav.js/variant-webcodecs
-npm install libavjs-webcodecs-bridge
+```npm install```
 
-npm install bootstrap
-npm install @popperjs/core
+```npm install @libav.js/variant-webcodecs```
+
+```npm install libavjs-webcodecs-bridge```
+
+```npm install bootstrap```
+
+```npm install @popperjs/core```
+
+modifier le nom de vidéo voulu dans app/service/libav-init-service, en haut du fichier
+
+```ng serve```
 
 
 # TIMER 
