@@ -43,3 +43,21 @@ modifier le nom de vidéo voulu dans app/service/libav-init-service, en haut du 
 - J'ai opté plutot que de prendre toute les frames selected, de les decodes et de les envoye a storyboard component pour qu'il les draws a un decodage frame par frame, et envoye frame par frame sur le draw, car quand j'envoyais plus de 14 frames d'un coup au draw, sa plantais.
 - J'utilisais de base libav.js variant vp9 webm, mais suite a de nombreux bug je suis passer sur libav webconect et libav webconect bridge, depuis meilleur process.
 -surveiller les versions des codecs, si la vidéo indique qu'elle na pas trouver de keyframes pour draw, c'est souvent lier a un pb de codec.
+- il existe sans doute un paquet de méthode pour optimiser et améliorer le temps général de process, cependant il faudra améliorer bcp de partis du code sans tous casser.
+- en webm, les metadata semble mal process par libav, et on n'a donc pas les données de base de la vidéo.
+
+# Sources
+
+Quelques sources pouvant aider :
+
+- [libav-5.4.6.1.1-webcodecs.js](https://github.com/Yahweasel/libavjs-webcodecs-bridge)
+- https://developer.chrome.com/docs/web-platform/best-practices/webcodecs?hl=fr
+- https://github.com/Yahweasel/libav.js
+- https://github.com/leandromoreira/ffmpeg-libav-tutorial
+
+
+# About
+
+Autheur :
+
+- Figueira Thibaut, https://github.com/thibautfgi
