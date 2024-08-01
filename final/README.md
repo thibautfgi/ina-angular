@@ -22,19 +22,19 @@ modifier le nom de vidéo voulu dans app/service/libav-init-service, en haut du 
 
 # TIMER 
 
-2h de video process en 18s/20s (512x385) (mp4) ==
+2h de video process en 18s/20s (512x385) (mp4) =
 
-Temps de Fetch: 7.0419921875 ms
-Demux: 143.739013671875 ms
-Reading frames: 16081.988037109375 ms
-Config: 5.3671875 ms
-Process Frames & Draw: 623.948974609375 ms
+- Temps de Fetch: 7.0419921875 ms
+- Demux: 143.739013671875 ms
+- Reading frames: 16081.988037109375 ms
+- Config: 5.3671875 ms
+- Process Frames & Draw: 623.948974609375 ms
 
- => FINAL TIME <= : 18244.184814453125 ms
+- => FINAL TIME <= : 18244.184814453125 ms
 
  # ATTENTION
 
- On ne peux pas utiliser libav via @node_module, car angular ne trouve pas le script dus au difference de type, il faut copier le contenue du script voulu et le placer dans notre dossier utilisable, par exemple assets/, normalement, cela ce fais automatiquement si vous avez fait les bonnes installations npm.
+ On ne peux pas utiliser libav via @node_module, car angular ne trouve pas le script (libav-5.4.6.1.1-webcodecs.js) dus au difference de type, il faut copier le contenue du script voulu et le placer dans notre dossier utilisable, par exemple assets/, normalement, cela ce fais automatiquement si vous avez fait les bonnes installations npm.
 
  # TODO / ERROR / REMARQUE
 
