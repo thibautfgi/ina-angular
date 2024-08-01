@@ -15,14 +15,12 @@ import { HeaderComponent } from '../header/header.component';
 export class BodyComponent implements OnInit {
 
   videoName$: Observable<string>;
-  moduloNumber$: Observable<number>;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
     private libavInitService: LibavInitService,
   ) {
     this.videoName$ = this.libavInitService.videoName$;
-    this.moduloNumber$ = this.libavInitService.moduloNumber$;
   }
 
   async ngOnInit() {

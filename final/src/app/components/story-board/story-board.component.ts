@@ -13,45 +13,43 @@ import { AsyncPipe, isPlatformBrowser } from '@angular/common';
 export class StoryBoardComponent implements OnInit {
 
   @Input() framesNumber$: Observable<number>;
-  @Input() moduloNumber$: Observable<number>;
   @Input() videoFrames$!: Observable<any>;
   @Input() customHeight$: Observable<number>;
   @Input() customWidth$: Observable<number>;
+  @Input() fps$: Observable<number>; 
 
-  @Input() frameRate: number = 30; // frame rate by default
+  private fps: number;
 
   constructor(
     private libavInitService: LibavInitService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.framesNumber$ = this.libavInitService.framesNumber$;
-    this.moduloNumber$ = this.libavInitService.moduloNumber$;
     this.videoFrames$ = this.libavInitService.videoFrames$;
     this.customHeight$ = this.libavInitService.customHeight$;
     this.customWidth$ = this.libavInitService.customWidth$;
+    this.fps$ = this.libavInitService.fps$;
+    this.fps = 0;
   }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      this.fps$.subscribe(fps => {
+        this.fps = fps;
+      });
       this.framesNumber$.subscribe(framesNumber => {
         if (framesNumber !== null) {
-          this.moduloNumber$.subscribe(moduloNumber => {
-            if (moduloNumber !== null) {
-              this.videoFrames$.subscribe(videoFrames => {
-                if (videoFrames !== null) {
-                  this.customHeight$.subscribe(customHeight => {
-                    this.customWidth$.subscribe(customWidth => {
-                      console.log("Starting Draw frame...");
-                      this.buildStoryBoard(framesNumber, moduloNumber, videoFrames, customHeight, customWidth);
-                      console.timeEnd("Draw frame");
-                    });
-                  });
-                } else {
-                  console.warn('Video frames are null, skipping buildStoryBoard');
-                }
+          this.videoFrames$.subscribe(videoFrames => {
+            if (videoFrames !== null) {
+              this.customHeight$.subscribe(customHeight => {
+                this.customWidth$.subscribe(customWidth => {
+                  console.log("Starting Draw frame...");
+                  this.buildStoryBoard(framesNumber, videoFrames, customHeight, customWidth);
+                  console.timeEnd("Draw frame");
+                });
               });
             } else {
-              console.warn('Modulo number is null, skipping buildStoryBoard');
+              console.warn('Video frames are null, skipping buildStoryBoard');
             }
           });
         } else {
@@ -63,7 +61,7 @@ export class StoryBoardComponent implements OnInit {
     }
   }
 
-  buildStoryBoard(framesNumber: number, moduloNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
+  buildStoryBoard(framesNumber: number, videoFrames: any, customHeight: number, customWidth: number): void {
     console.time("Draw frame");
     const frameToPrint = videoFrames.length;
     const numberOfRows = Math.ceil(frameToPrint / 5);
@@ -89,7 +87,7 @@ export class StoryBoardComponent implements OnInit {
         col.classList.add('flex-fill');
 
         console.log(`Drawing frame ${index}...`);
-        const canvas = this.DrawFrame(videoFrames[index], customWidth, customHeight, index, moduloNumber);
+        const canvas = this.drawFrame(videoFrames[index], customWidth, customHeight, index);
         if (canvas) {
           col.appendChild(canvas);
         }
@@ -100,7 +98,7 @@ export class StoryBoardComponent implements OnInit {
     }
   }
 
-  DrawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, frameIndex: number, moduloNumber: number): HTMLCanvasElement | null {
+  drawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, frameIndex: number): HTMLCanvasElement | null {
     if (isPlatformBrowser(this.platformId)) {
 
       if (!videoFrame) {
@@ -116,7 +114,7 @@ export class StoryBoardComponent implements OnInit {
       createImageBitmap(videoFrame).then(imageBitmap => {
         ctx.drawImage(imageBitmap, 0, 0, customWidth, customHeight);
 
-        const timeInSeconds = frameIndex * moduloNumber / this.frameRate;
+        const timeInSeconds = frameIndex / this.fps;
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = Math.floor(timeInSeconds % 60);
         const milliseconds = Math.floor((timeInSeconds % 1) * 1000);
@@ -134,7 +132,7 @@ export class StoryBoardComponent implements OnInit {
 
       return canvas;
     } else {
-      console.warn('DrawFrame called in non-browser environment');
+      console.warn('drawFrame called in non-browser environment');
       return null;
     }
   }
