@@ -22,12 +22,17 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
+              "src/assets",
               {
                 "glob": "**/*",
-                "input": "src/assets/libav/",
-                "output": "/assets/libav/"
+                "input": "node_modules/libav.js/variant-webcodecs/",
+                "output": "/assets/"
               },
-              "src/assets"
+              {
+                "glob": "**/*",
+                "input": "node_modules/libavjs-webcodecs-bridge/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",

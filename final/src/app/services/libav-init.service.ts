@@ -11,7 +11,7 @@ declare var LibAVWebCodecsBridge: any;
 export class LibavInitService {
 
   // Setup initial data
-  private videoName = new BehaviorSubject<string>("test2.mp4"); // video to test
+  private videoName = new BehaviorSubject<string>("test3.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
   private maxKeyFrames = new BehaviorSubject<number>(40); // max keyframes
@@ -43,7 +43,7 @@ export class LibavInitService {
   async initLibAV() {
     try {
       console.log("Starting Init...");
-      console.time("Temps Init"); // All the process
+      console.time(" => FINAL TIME <= "); // All the process
 
       // Catch value to be usable in this func
       const videoName = this.videoName.getValue();
@@ -178,7 +178,7 @@ export class LibavInitService {
       console.timeEnd(" => Process Frames & Draw");
 
       console.log("------------------");
-      console.timeEnd("Temps Init");
+      console.timeEnd(" => FINAL TIME <= ");
       console.log("Fps = ", +this.fps.getValue());
       console.log("Frame Number = " + totalFrames);
       console.log("Video name = " + videoName);
@@ -242,7 +242,7 @@ export class LibavInitService {
   // permet de recupere une codec string utilisable par libav en fct du codec donne
   private getCodecString(codecName: string): string {
     switch (codecName) {
-      case 'h264':
+      case 'h264': // TODO: add h265 et sous version de h264
         return 'avc1.42001E'; // le plus commun pour mp4/h264, des cas particuliers existent
       case 'vp8':
         return 'vp8';
