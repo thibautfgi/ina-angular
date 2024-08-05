@@ -11,7 +11,7 @@ declare var LibAVWebCodecsBridge: any;
 export class LibavInitService {
 
   // Setup initial data
-  private videoName = new BehaviorSubject<string>("test2.mp4"); // video to test
+  private videoName = new BehaviorSubject<string>("test3.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
   private maxKeyFrames = new BehaviorSubject<number>(50); // max keyframes

@@ -18,7 +18,7 @@ export class SliderComponent implements OnInit, AfterViewInit {
   @Input() customWidth$: Observable<number>;
   @Input() fps$: Observable<number>;
 
-  @ViewChild('myRange')
+  @ViewChild('myRange')  //permet de suivre le changement de donne interne au html
   slider!: ElementRef<HTMLInputElement>;
   @ViewChild('demo')
   output!: ElementRef<HTMLDivElement>;

@@ -7,7 +7,7 @@
     width: 100%; /* Width of the outside container */
 }
 
-/* The slider itself , take from w3h example */
+/* The slider itself , take from w3scholl example maybe gift img better? */
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
