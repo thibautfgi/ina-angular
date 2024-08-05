@@ -1,6 +1,6 @@
 # projet libav
 
-J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a de nombreux test c'est la version ou j'ai eus le moins de bug. J'utilise libav pour fetch, demuxe, read et webcodec pour config, process et decode, bridge pour recupere les metadata indispensable au mp4.
+J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a de nombreux test c'est la version ou j'ai eus le moins de bug. J'utilise libav pour fetch, demuxe, read et webcodec pour config, process et decode, bridge pour recupere les metadata indispensable au mp4. J'utilise l'Api web CanvasRenderingContext2D, pour dessiner les images
 
 
 # Testing
@@ -15,7 +15,7 @@ J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a
 
 ```npm install @popperjs/core```
 
-modifier le nom de vidéo voulu dans app/service/libav-init-service, en haut du fichier
+- modifier le nom de vidéo cible dans app/service/libav-init-service, en haut du fichier
 
 ```ng serve```
 
@@ -44,7 +44,8 @@ modifier le nom de vidéo voulu dans app/service/libav-init-service, en haut du 
 - J'utilisais de base libav.js variant vp9 webm, mais suite a de nombreux bug je suis passer sur libav webconect et libav webconect bridge, depuis meilleur process.
 -surveiller les versions des codecs, si la vidéo indique qu'elle na pas trouver de keyframes pour draw, c'est souvent lier a un pb de codec.
 - il existe sans doute un paquet de méthode pour optimiser et améliorer le temps général de process, cependant il faudra améliorer bcp de partis du code sans tous casser.
-- en webm, les metadata semble mal process par libav, et on n'a donc pas les données de base de la vidéo.
+- en webm, les metadata semble mal process par libav, et on n'a donc pas toutes les données de base de la vidéo.
+- Ajuster les codes en fonction du besoin mp4, il y en a beaucoup disponible.
 
 # Sources
 

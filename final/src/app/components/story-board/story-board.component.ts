@@ -17,7 +17,6 @@ export class StoryBoardComponent implements OnInit {
   @Input() customHeight$: Observable<number>;
   @Input() customWidth$: Observable<number>;
   @Input() fps$: Observable<number>;
-  @Input() keyframeIndices$: Observable<number[]>;
 
   private fps: number = 25; // default value, will be updated from fps$
   private previousFrameCount: number = 0; // Track the number of previously drawn frames
@@ -31,7 +30,6 @@ export class StoryBoardComponent implements OnInit {
     this.customHeight$ = this.libavInitService.customHeight$;
     this.customWidth$ = this.libavInitService.customWidth$;
     this.fps$ = this.libavInitService.fps$;
-    this.keyframeIndices$ = this.libavInitService.keyframeIndices$;
   }
 
   // init en meme temps tt les donnes suscribe
@@ -43,11 +41,11 @@ export class StoryBoardComponent implements OnInit {
         this.videoFrames$,
         this.customHeight$,
         this.customWidth$,
-        this.keyframeIndices$
-      ]).subscribe(([fps, framesNumber, videoFrames, customHeight, customWidth, keyframeIndices]) => {
+      ]).subscribe(([fps, framesNumber, videoFrames, customHeight, customWidth]) => {
         this.fps = fps;
-        if (framesNumber !== null && videoFrames !== null && videoFrames.length > 0) { 
-          this.buildStoryBoard(videoFrames, customHeight, customWidth, fps, keyframeIndices);
+        if (framesNumber !== null && videoFrames !== null && videoFrames.length > 0) {
+          // si on a des data, lance le processus de draw
+          this.buildStoryBoard(videoFrames, customHeight, customWidth, fps);
         }
       });
     } else {
@@ -56,14 +54,14 @@ export class StoryBoardComponent implements OnInit {
   }
 
   // build le story board
-  buildStoryBoard(videoFrames: any[], customHeight: number, customWidth: number, fps: number, keyframeIndices: number[]): void {
+  buildStoryBoard(videoFrames: any[], customHeight: number, customWidth: number, fps: number): void {
     const storyboardContainer: HTMLElement = document.getElementById('storyContainer') as HTMLElement;
     if (!storyboardContainer) {
       console.error('Storyboard container not found');
       return;
     }
 
-    const frameToPrint = videoFrames.length;
+    const frameToPrint = videoFrames.length; // permet de ne pas redessiner tt les frames plusieurs fois
 
     // 5 img par ligne
     for (let index = this.previousFrameCount; index < frameToPrint; index++) {
@@ -79,7 +77,9 @@ export class StoryBoardComponent implements OnInit {
       const col = document.createElement('div');
       col.classList.add('flex-fill');
 
-      const canvas = this.drawFrame(videoFrames[index].frame, customWidth, customHeight, keyframeIndices[index], fps);
+      const timestamp = this.calculateTimestamp(videoFrames[index].frameNumber, fps);
+      const formattedTimestamp = this.formatTimestamp(timestamp);
+      const canvas = this.drawFrame(videoFrames[index].frame, customWidth, customHeight, formattedTimestamp);
       if (canvas) {
         col.appendChild(canvas);
       }
@@ -90,14 +90,14 @@ export class StoryBoardComponent implements OnInit {
     this.previousFrameCount = frameToPrint;
   }
 
-
   // dessine la frame
-  drawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, frameIndex: number, fps: number): HTMLCanvasElement | null {
+  drawFrame(videoFrame: VideoFrame, customWidth: number, customHeight: number, timestamp: string): HTMLCanvasElement | null {
     if (!videoFrame) {
       console.error('Display frame not found');
       return null;
     }
 
+    // cree un can
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
     canvas.width = customWidth;
@@ -105,10 +105,39 @@ export class StoryBoardComponent implements OnInit {
 
     createImageBitmap(videoFrame).then(imageBitmap => {
       ctx.drawImage(imageBitmap, 0, 0, customWidth, customHeight);
+      // Draw the timestamp on the image
+      ctx.font = '16px Arial';
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 4;
+      ctx.strokeText(timestamp, 10, 20);
+      ctx.fillText(timestamp, 10, 20);
     }).catch(error => {
       console.error('Error creating image bitmap:', error);
     });
 
     return canvas;
+  }
+
+  // calcule le timestamp pour une frame donnée
+  calculateTimestamp(frameNumber: number, fps: number): number {
+    return frameNumber / fps;
+  }
+
+  // formate le timestamp en heure:minute:seconde:c
+  formatTimestamp(timestamp: number): string {
+    const hours = Math.floor(timestamp / 3600);
+    const minutes = Math.floor((timestamp % 3600) / 60);
+    const seconds = Math.floor(timestamp % 60);
+    const milliseconds = Math.floor((timestamp % 1) * 100); //homemade c
+
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}.${this.pad(milliseconds, 2)}`;
+  }
+
+  // ajout de zéros devant le nombre
+  pad(num: number, size: number = 2): string {
+    let s = num.toString();
+    while (s.length < size) s = '0' + s;
+    return s;
   }
 }

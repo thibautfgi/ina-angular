@@ -24,18 +24,17 @@ export class BodyComponent implements OnInit {
   }
 
   async ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      // Load LibAV script
+    if (isPlatformBrowser(this.platformId)) { // detecte le browser, permet d'evite une erreur
+      // Load the 2 LibAV script
       await this.loadScript('assets/variant-webcodecs/dist/libav-5.4.6.1.1-webcodecs.js');
-      // Load LibAVWebCodecsBridge script
       await this.loadScript('assets/libavjs-webcodecs-bridge/dist/libavjs-webcodecs-bridge.js');
       
-      // Initialize LibAV
+      // Init LibAV
       this.libavInitService.initLibAV();
     }
   }
 
-  private loadScript(src: string): Promise<void> {
+  private loadScript(src: string): Promise<void> { // cree une balise script et l'add au html
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = src;
