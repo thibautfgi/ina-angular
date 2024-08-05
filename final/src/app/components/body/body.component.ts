@@ -27,12 +27,6 @@ export class BodyComponent implements OnInit {
     this.frameNumber$ = this.libavInitService.framesNumber$;
   }
 
-  // showSliderIf(frameNumber : number, myBool : boolean): boolean {
-  //   if (frameNumber != 0 && frameNumber != undefined) {
-  //     myBool = true
-  //   }
-  //   return myBool
-  // }
 
   async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) { // detecte le browser, permet d'evite une erreur

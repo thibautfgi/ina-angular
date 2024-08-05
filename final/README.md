@@ -1,6 +1,6 @@
 # projet libav
 
-J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a de nombreux test c'est la version ou j'ai eus le moins de bug. J'utilise libav pour fetch, demuxe, read et webcodec pour config, process et decode, bridge pour recupere les metadata indispensable au mp4. J'utilise l'Api web CanvasRenderingContext2D, pour dessiner les images
+J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a de nombreux test c'est la version ou j'ai eus le moins de bug. J'utilise libav pour fetch, demuxe, read et webcodec pour config, process et decode, bridge pour recupere les metadata indispensable au mp4. J'utilise l'Api web CanvasRenderingContext2D, pour dessiner les images.
 
 
 # Testing
@@ -46,6 +46,14 @@ J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a
 - il existe sans doute un paquet de méthode pour optimiser et améliorer le temps général de process, cependant il faudra améliorer bcp de partis du code sans tous casser.
 - en webm, les metadata semble mal process par libav, et on n'a donc pas toutes les données de base de la vidéo.
 - Ajuster les codes en fonction du besoin mp4, il y en a beaucoup disponible.
+- Si le projet vise a afficher qu'une image, on poura gagner un tout petit temps de process en chargeant uniquement l'image a display, plutot que de tout charger une fois, est ce mieux?
+- Il manquent des ms que je ne traque pas correctement dans le final time.
+
+
+
+# Slider
+
+Fonctionnement : le slider commence par charger toutes les selected keyframes, une fois toute les images préparers, il display la keyframes 0, on peut ensuite jouer avec le slider, et il va display la keyframe selectionner la plus proche du timer video, plus il y a de keyframes process (modifiable dans service/libav-init), plus le slider sera proche de la realité timer/image.
 
 # Sources
 
