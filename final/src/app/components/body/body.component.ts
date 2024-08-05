@@ -16,13 +16,23 @@ import { SliderComponent } from "../slider/slider.component";
 export class BodyComponent implements OnInit {
 
   videoName$: Observable<string>;
+  frameNumber$: Observable<number>;
+
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
     private libavInitService: LibavInitService,
   ) {
     this.videoName$ = this.libavInitService.videoName$;
+    this.frameNumber$ = this.libavInitService.framesNumber$;
   }
+
+  // showSliderIf(frameNumber : number, myBool : boolean): boolean {
+  //   if (frameNumber != 0 && frameNumber != undefined) {
+  //     myBool = true
+  //   }
+  //   return myBool
+  // }
 
   async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) { // detecte le browser, permet d'evite une erreur

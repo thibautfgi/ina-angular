@@ -14,7 +14,7 @@ export class LibavInitService {
   private videoName = new BehaviorSubject<string>("test2.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
-  private maxKeyFrames = new BehaviorSubject<number>(40); // max keyframes
+  private maxKeyFrames = new BehaviorSubject<number>(50); // max keyframes
 
   // Init empty data
   private videoFrames = new BehaviorSubject<any[]>([]);

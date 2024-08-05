@@ -1,5 +1,39 @@
-<div id="demo" #demo>0</div> <!-- Set initial value here for clarity -->
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center mt-4">
 
-<div class="slidecontainer container-fluid">
-  <input type="range" min="0" [max]="maxFrames" value="0" class="slider" id="myRange" #myRange>
-</div>
+    <div class="row w-100">
+        <div class="d-flex justify-content-center">
+
+            <div id="imageSliderContainer" class="imageSliderContainer border position-relative" [style.height.px]="customHeight" [style.width.px]="customWidth">
+            
+                 <!-- loading icon -->
+                <div *ngIf="loading" class="spinner-container">
+                    <div id="loading-bar-spinner" class="spinner">
+                    <div class="spinner-icon"></div>
+                </div>
+
+            </div>
+
+                <div *ngIf="!loading">
+                    <!-- Frame drawn here -->
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row w-100 mt-3">
+      <div class="d-flex justify-content-center">
+        <div id="demo" #demo>0</div> <!-- Set initial value here for clarity -->
+      </div>
+    </div>
+
+    <div class="row w-100 mt-3">
+      <div class="d-flex justify-content-center">
+        <input type="range" min="0" [max]="maxFrames" value="0" class="slider" id="myRange" #myRange>
+      </div>
+    </div>
+
+  </div>
+  
