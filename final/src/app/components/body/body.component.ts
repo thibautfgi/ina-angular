@@ -4,11 +4,12 @@ import { AsyncPipe, isPlatformBrowser } from '@angular/common';
 import { StoryBoardComponent } from '../story-board/story-board.component';
 import { Observable, Subscription } from 'rxjs';
 import { HeaderComponent } from '../header/header.component';
+import { SliderComponent } from "../slider/slider.component";
 
 @Component({
   selector: 'app-body',
   standalone: true,
-  imports: [AsyncPipe, StoryBoardComponent, HeaderComponent],
+  imports: [AsyncPipe, StoryBoardComponent, HeaderComponent, SliderComponent],
   templateUrl: './body.component.html',
   styleUrls: ['./body.component.css']
 })
