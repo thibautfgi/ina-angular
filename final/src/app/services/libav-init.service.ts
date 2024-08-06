@@ -14,7 +14,7 @@ export class LibavInitService {
   private videoName = new BehaviorSubject<string>("test3.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
-  private maxKeyFrames = new BehaviorSubject<number>(50); // default keyframes value
+  private maxKeyFrames = new BehaviorSubject<number>(240); // default keyframes value
 
   // Init empty data
   private videoFrames = new BehaviorSubject<any[]>([]);
@@ -58,9 +58,11 @@ export class LibavInitService {
       const videoData = await fetch(`assets/video/${videoName}`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not ok');
-          console.timeEnd(" => Temps de Fetch");
+   
           return response.arrayBuffer();
         });
+
+      console.timeEnd(" => Temps de Fetch");
 
       // Write data in the video
       console.log("Starting WriteFile...");
