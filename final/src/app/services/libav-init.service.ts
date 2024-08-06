@@ -14,7 +14,7 @@ export class LibavInitService {
   private videoName = new BehaviorSubject<string>("test3.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
-  private maxKeyFrames = new BehaviorSubject<number>(50); // max keyframes
+  private maxKeyFrames = new BehaviorSubject<number>(50); // default keyframes value
 
   // Init empty data
   private videoFrames = new BehaviorSubject<any[]>([]);
@@ -47,7 +47,7 @@ export class LibavInitService {
       const videoName = this.videoName.getValue();
       const customHeight = this.customHeight.getValue();
       const customWidth = this.customWidth.getValue();
-      const maxKeyFrames = this.maxKeyFrames.getValue();
+      
       const libav = await LibAV.LibAV();
       let videoDecoderConfig: any;
 
@@ -111,6 +111,24 @@ export class LibavInitService {
       // Count frames
       const totalFrames = videoPackets.length;
       this.framesNumber.next(totalFrames);
+
+      // fps
+      const truefps = totalFrames / videoStream.duration;
+      this.fps.next(truefps);
+
+      // max keyframe to display, 
+      // i try to do proportional, ajust at your need
+      // DELETE setupMaxKeyframes if u want manual value
+      // and uncommente the lign below
+
+
+      const maxKeyFrames = this.maxKeyFrames.getValue();
+
+
+      //const maxKeyFrames = this.setupMaxKeyFrames(totalFrames, truefps)
+
+
+      
     
       // Nbr de keyframes to display, regardless of file size, they
       // will be selected at regular intervals more or less large depending on the
@@ -153,9 +171,8 @@ export class LibavInitService {
         };
 
         // If mp4 take good stream information
-        // Calculate fps
-        const truefps = totalFrames / videoStream.duration;
-        this.fps.next(truefps);
+        // Calculate fps ?
+
 
       } else { // For webm no need for extradata to set up config
         videoDecoderConfig = {
@@ -268,4 +285,33 @@ export class LibavInitService {
     console.error('Extradata not found');
     return null;
   }
+
+
+  //FIXME: a proportional keyframe picker not working for everycase
+  setupMaxKeyFrames(totalFrames: number, truefps: number): number {
+
+    const videoDurationInSeconds = totalFrames / truefps;
+    let newMaxKeyFrames: number;
+    let videoDurationInMinutes: number;
+
+    if (videoDurationInSeconds <= 120) { // inferieur a 2mn une img par 2.5s
+      videoDurationInMinutes = videoDurationInSeconds / 5
+
+    }
+    else if (videoDurationInSeconds <= 240) { // inferieur a 4mn une img par 5s
+      videoDurationInMinutes = videoDurationInSeconds / 10
+
+    }
+    else {
+      videoDurationInMinutes = videoDurationInSeconds / 60; //une keyframe tt les 30s
+    }
+    newMaxKeyFrames = videoDurationInMinutes * 2; 
+   
+    this.maxKeyFrames.next(Math.ceil(newMaxKeyFrames));
+
+    
+    const maxKeyFrames = this.maxKeyFrames.getValue();
+    return maxKeyFrames
+  }
+
 }

@@ -48,6 +48,7 @@ J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a
 - Ajuster les codec en fonction du besoin mp4, il y en a beaucoup disponible.
 - Si le projet vise a afficher qu'une image, on poura gagner un tout petit temps de process en chargeant uniquement l'image a display, plutot que de tout charger une fois, est ce mieux?
 - Il manquent des ms que je ne traque pas correctement dans le final time.
+- le calcul pour le nbr de keyframe peux etre ajuster selon besoin.
 
 
 
