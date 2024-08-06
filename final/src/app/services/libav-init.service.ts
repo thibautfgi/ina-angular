@@ -11,10 +11,12 @@ declare var LibAVWebCodecsBridge: any;
 export class LibavInitService {
 
   // Setup initial data
-  private videoName = new BehaviorSubject<string>("test3.mp4"); // video to test
+  private videoName = new BehaviorSubject<string>("test2.mp4"); // video to test
   private customHeight = new BehaviorSubject<number>(150); // image height size
   private customWidth = new BehaviorSubject<number>(300); // image width size
   private maxKeyFrames = new BehaviorSubject<number>(240); // default keyframes value
+
+
 
   // Init empty data
   private videoFrames = new BehaviorSubject<any[]>([]);
@@ -101,7 +103,6 @@ export class LibavInitService {
       const [result, packets] = await libav.ff_read_frame_multi(fmt_ctx, await libav.av_packet_alloc());
 
 
-
       if (result === libav.AVERROR_EOF) { // Detect if we have read the entire video
         console.log("End of file reached");
       }
@@ -126,7 +127,7 @@ export class LibavInitService {
 
       const maxKeyFrames = this.maxKeyFrames.getValue();
 
-
+      // proportional
       //const maxKeyFrames = this.setupMaxKeyFrames(totalFrames, truefps)
 
 
@@ -184,7 +185,7 @@ export class LibavInitService {
         };
 
         // If webm stream information is overall bad
-        const truefps = 30;
+        const truefps = 25; // set manuel cause webm is bad
         this.fps.next(truefps);
       }
 
