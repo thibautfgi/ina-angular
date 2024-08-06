@@ -1,6 +1,10 @@
-<div class="container-fluid d-flex flex-column justify-content-center align-items-center mt-4">
 
-    <div class="row w-100">
+
+<!-- Starting Container -->
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center mt-4">  
+
+    <div class="row w-100"> <!-- Starting Row 1 --> 
+
         <div class="d-flex justify-content-center">
 
             <div id="imageSliderContainer" class="imageSliderContainer border position-relative" [style.height.px]="customHeight" [style.width.px]="customWidth">
@@ -20,20 +24,25 @@
             </div>
 
         </div>
-    </div>
+
+    </div>  <!-- End Row 1 -->
 
 
-    <div class="row w-100 mt-3">
+    <div class="row w-100 mt-3">  <!-- Starting Row 2 -->
+
       <div class="d-flex justify-content-center">
         <div id="demo" #demo>0</div> <!-- Set initial value here for clarity -->
       </div>
-    </div>
 
-    <div class="row w-100 mt-3">
+    </div>  <!-- End Row 2 -->
+
+    <div class="row w-100 mt-3">  <!-- Starting Row 3 -->
+
       <div class="d-flex justify-content-center">
         <input type="range" min="0" [max]="maxFrames" value="0" class="slider" id="myRange" #myRange>
       </div>
-    </div>
 
-  </div>
+    </div>  <!-- End Row 3 -->
+
+</div> <!-- End Container -->
   

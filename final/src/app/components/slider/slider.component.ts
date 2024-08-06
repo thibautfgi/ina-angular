@@ -27,10 +27,9 @@ export class SliderComponent implements OnInit, AfterViewInit {
   customHeight: number = 150; // default value, will be updated from customHeight$
   customWidth: number = 300; // default value, will be updated from customWidth$
   private fps: number = 25; // default value, will be updated from fps$
-  private previousFrameCount: number = 0; // Track the number of previously drawn frames
   videoFrames: any;
   private previousSelectedImage: number = -1; // Track the previously selected image
-  loading: boolean = true; // Loading flag
+  loading: boolean = true; // Loading, permet de suivre si les données sont load ou non
 
   constructor(
     private libavInitService: LibavInitService,
@@ -182,7 +181,7 @@ export class SliderComponent implements OnInit, AfterViewInit {
     this.output.nativeElement.innerHTML = this.formatTimestamp(this.calculateTimestamp(parseInt(value), fps)) + " / " + this.formatTimestamp(this.calculateTimestamp((maxValue), fps));
   }
 
-  // Calculate the timestamp for a given frame
+  // Calculate the timestamp for a given frame, result in second
   calculateTimestamp(frameNumber: number, fps: number): number {
     return frameNumber / fps;
   }

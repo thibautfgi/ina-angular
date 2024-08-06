@@ -45,7 +45,7 @@ J'ai utilise libav-5.4.6.1.1-webcodecs.js ET libavjs-webcodecs-bridge.js suite a
 -surveiller les versions des codecs, si la vidéo indique qu'elle na pas trouver de keyframes pour draw, c'est souvent lier a un pb de codec.
 - il existe sans doute un paquet de méthode pour optimiser et améliorer le temps général de process, cependant il faudra améliorer bcp de partis du code sans tous casser.
 - en webm, les metadata semble mal process par libav, et on n'a donc pas toutes les données de base de la vidéo.
-- Ajuster les codes en fonction du besoin mp4, il y en a beaucoup disponible.
+- Ajuster les codec en fonction du besoin mp4, il y en a beaucoup disponible.
 - Si le projet vise a afficher qu'une image, on poura gagner un tout petit temps de process en chargeant uniquement l'image a display, plutot que de tout charger une fois, est ce mieux?
 - Il manquent des ms que je ne traque pas correctement dans le final time.
 

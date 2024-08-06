@@ -85,7 +85,7 @@ export class LibavInitService {
           break;
         }
       }
-      if (videoIdx === -1) throw new Error("Video stream not found");
+      if (videoIdx === -1) throw new Error("Video stream not found"); 
 
       // Canal video
       const videoStream = streams[videoIdx];
@@ -94,22 +94,29 @@ export class LibavInitService {
       console.time(" => Reading frames");
 
       // Read many packet at once return packets ready to use and err/success msg
+      // FIXME: libav ne semble pas pourvoir faire sa, mais peut etre le read deviendrais bcp plus rapide si
+      // on lisait juste les paquets vidéo.
       const [result, packets] = await libav.ff_read_frame_multi(fmt_ctx, await libav.av_packet_alloc());
+
+
 
       if (result === libav.AVERROR_EOF) { // Detect if we have read the entire video
         console.log("End of file reached");
       }
       console.timeEnd(" => Reading frames");
 
-      // Count frames
-      const totalFrames = packets[videoStream.index].length;
-      this.framesNumber.next(totalFrames);
+      // Filter only video packets
+      const videoPackets = packets[videoStream.index];
 
+      // Count frames
+      const totalFrames = videoPackets.length;
+      this.framesNumber.next(totalFrames);
+    
       // Nbr de keyframes to display, regardless of file size, they
       // will be selected at regular intervals more or less large depending on the
       // file size, if < 40 keyframes, display all directly
       // if > 40, sort with the modulo of the keyframes
-      const keyFrames = packets[videoStream.index].map((pkt: any, index: number) => ({ pkt, index }))
+      const keyFrames = videoPackets.map((pkt: any, index: number) => ({ pkt, index }))
         .filter((item: any) => item.pkt.flags & 1);
       
       const modulo = Math.ceil(keyFrames.length / maxKeyFrames);
