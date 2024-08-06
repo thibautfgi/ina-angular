@@ -16,6 +16,8 @@ export class LibavInitService {
   private customWidth = new BehaviorSubject<number>(300); // image width size
   private maxKeyFrames = new BehaviorSubject<number>(240); // default keyframes value
 
+  
+
 
 
   // Init empty data

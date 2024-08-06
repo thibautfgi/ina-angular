@@ -1,52 +1,46 @@
-
-
-
-
 <div class="container-fluid"> <!--START CONTAINER -->
 
-    <div class="row mb-4"> <!--START ROW1 -->
+  <div class="row mb-4"> <!--START ROW1 -->
 
-      <div class="col-3"></div>
+    <div class="col-3"></div>
 
-      <div class="col-6">
+    <div class="col-6">
+      <app-header></app-header>
+    </div>
 
-        <app-header></app-header>
+    <div class="col-3"></div>
 
+  </div>  <!-- END ROW1 -->
+
+  <div class="row mb-4"> <!--START ROW2 -->
+
+    <div class="col-4"></div>
+
+    <!-- test l'api, si marche pas envoie un msg d'err -->
+    <div class="col-4">
+      <div *ngIf="!webCodecsSupported">
+        <p>WebCodecs API is not supported in this browser.</p>
+      </div>
+      
+      <div *ngIf="webCodecsSupported">
+        <app-slider></app-slider>
+      </div>
+    </div>
+
+    <div class="col-4"></div>
+
+  </div>  <!-- END ROW2 -->
+  
+  <div class="row mt-4"> <!--START ROW3 -->
+
+      <div class="col-1"></div>
+
+      <div class="col-10">
+          <app-story-board></app-story-board>
       </div>
 
-      <div class="col-3"></div>
+      <div class="col-1"></div>
 
-    </div>  <!-- END ROW1 -->
+  </div>  <!--END ROW 3 -->
 
-    <div class="row mb-4"> <!--START ROW2 -->
-
-      <div class="col-4"></div>
-
-      <div class="col-4">
-
-          <app-slider></app-slider>
-
-
-      </div>
-
-      <div class="col-4"></div>
-
-    </div>  <!-- END ROW2 -->
-    
-    <div class="row mt-4"> <!--START ROW3 -->
-
-        <div class="col-1"></div>
-  
-        <div class="col-10">
-  
-            <app-story-board></app-story-board>
-  
-        </div>
-  
-        <div class="col-1"></div>
-  
-      </div>  <!--END ROW 3 -->
-  
-
-    
 </div> <!-- END CONTAINER -->
